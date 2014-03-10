@@ -1,0 +1,1 @@
+cmd /k openfl test project.xml flash

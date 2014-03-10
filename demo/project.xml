@@ -19,7 +19,7 @@
 	<window fullscreen="true" resizable="true" if="android" />
 	
 	<classpath path="src" />
-	<classpath name="../Sooplay/z-commom_libs2" />
+	<haxelib name="skeletoraxe" />
 	<haxelib name="openfl" />
 	<haxelib name="openfl-compatibility" />
 	

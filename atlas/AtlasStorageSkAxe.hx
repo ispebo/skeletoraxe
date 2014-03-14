@@ -19,10 +19,10 @@ class AtlasStorageSkAxe
 	private var _bitmap							: Bitmap;
 	private var _xml							: Xml;
 	
-	private var _originalMovieClipsAtlas		: Map<String, MovieclipSkAxe>;//On stocke tous les movieclips du jeu
+	private var _originalMovieClipsAtlas		: Map<String, MovieClip>;//On stocke tous les movieclips du jeu
 	
 	public static  var BUFFER					: Int = 50; //Max de movieclips dans la pool
-	private var _pool							: Array<MovieclipSkAxe>;
+	private var _pool							: Array<MovieClip>;
 	private var _toLoad							: Int;
 	
 	public function new( cb:   Void->Void ) : Void
@@ -34,21 +34,21 @@ class AtlasStorageSkAxe
 	}
 	
 	//-------------------------------------------------------------------
-	public function getMovieByName( id: String ) : MovieclipSkAxe 
+	public function getMovieByName( id: String ) : MovieClip 
 	{	
-		var movie: MovieclipSkAxe = getFromPool( id );
+		var movie: MovieClip = getFromPool( id );
 		if ( movie == null )
 		{
 			
-			var originMovie: MovieclipSkAxe = _originalMovieClipsAtlas.get(id); 
-			movie = new MovieclipSkAxe( id, originMovie.ipbAtlas, originMovie.framesConfig );
+			var originMovie: MovieClip = _originalMovieClipsAtlas.get(id); 
+			movie = new MovieClip( id, originMovie.ipbAtlas, originMovie.framesConfig );
 		}
 		
 		return movie;
 	}
 	//-------------------------------------------------------------------
 	//On vient de supprimer un IPBAtlasMovieclip de la scène
-	public function removeChildFromStage( movie: MovieclipSkAxe ) : Void
+	public function removeChildFromStage( movie: MovieClip ) : Void
 	{
 		movie.playing = false;
 		var destroyMovie: Bool = true;
@@ -71,9 +71,9 @@ class AtlasStorageSkAxe
 		if( destroyMovie )  movie.destroy();
 	}
 	//-------------------------------------------------------------------
-	private function getFromPool( id: String ) : MovieclipSkAxe
+	private function getFromPool( id: String ) : MovieClip
 	{
-		var movie: MovieclipSkAxe = null;
+		var movie: MovieClip = null;
 		var i : Int = 0;
 		while ( movie == null  && i < _pool.length )
 		{
@@ -134,13 +134,13 @@ class AtlasStorageSkAxe
 	}
 	
 	//-------------------------------------------------------------------
-	public function getMovieClips() : Array<MovieclipSkAxe>
+	public function getMovieClips() : Array<MovieClip>
 	{
-		var movies: Array<MovieclipSkAxe> = new Array();
+		var movies: Array<MovieClip> = new Array();
 		var i : Iterator<String> = _originalMovieClipsAtlas.keys();		
 		while( i.hasNext() )
 		{
-			var movie: MovieclipSkAxe = _originalMovieClipsAtlas.get( i.next() );
+			var movie: MovieClip = _originalMovieClipsAtlas.get( i.next() );
 			movies.push( movie );
 		}
 		
@@ -234,7 +234,7 @@ class AtlasStorageSkAxe
 							}
 						}
 						//trace("=> " + node.get("id"));
-						_originalMovieClipsAtlas.set( node.get("id"), new MovieclipSkAxe(  node.get("id"), ipbAtlas, framesConfiguration) );
+						_originalMovieClipsAtlas.set( node.get("id"), new MovieClip(  node.get("id"), ipbAtlas, framesConfiguration) );
 				}
 				
 			}
@@ -254,7 +254,7 @@ class AtlasStorageSkAxe
 		var i : Iterator<String> = _originalMovieClipsAtlas.keys();		
 		while( i.hasNext() )
 		{
-			var movie: MovieclipSkAxe = _originalMovieClipsAtlas.get( i.next() );
+			var movie: MovieClip = _originalMovieClipsAtlas.get( i.next() );
 			movie.destroy(  );
 		}
 	

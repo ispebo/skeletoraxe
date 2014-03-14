@@ -6,7 +6,7 @@ import flash.events.Event;
 
 import skeletoraxe.engine.Engine;
 import skeletoraxe.atlas.AtlasStorageSkAxe;
-import skeletoraxe.atlas.MovieclipSkAxe;
+import skeletoraxe.atlas.MovieClip;
 
 import flash.Lib;
 
@@ -17,6 +17,9 @@ import com.standard.log.alcon.Debug;
 /**
  * @author ispebo
  */
+
+
+ 
 class Main extends Engine
 {
 	public static var STAGE								: Stage;
@@ -118,19 +121,18 @@ class Main extends Engine
 	//--------------------------------------------------------------------------
 	private function createAnim(  _x: Float, _y: Float ) : Void
 	{
-		var movie: MovieClip = this.newMovieClip( _animsDefinition[ Std.random(_animsDefinition.length) ] );
+		var movie: MovieClip = createMovieClip( _animsDefinition[ Std.random(_animsDefinition.length) ] );
 		addChild( movie );
 		movie.x = _x;
 		movie.y = _y;
-		enableMovieClip( movie, true  );
+		displayMovie( movie  );
 		
 		movie.addFrameScript( movie.totalFrames - 1, function() 
 													{ 
 														if ( Std.random(5) == 1 ) 
 														{
 															movie.addFrameScript( movie.totalFrames - 1, null);
-															movie.playing = false;
-															
+															movie.removeFlag = true;
 														}
 													} );
 	}
@@ -144,10 +146,10 @@ class Main extends Engine
 		while ( i < _enableMovies.length )
 		{
 			var movie: MovieClip = _enableMovies[i];
-			if ( !movie.playing )
+			if ( movie.removeFlag )
 			{
-				enableMovieClip( movie, false  );
 				removeChild( movie );
+				unDisplayMovie( movie  );
 				createAnim( movie.x, movie.y);
 			}
 			else 

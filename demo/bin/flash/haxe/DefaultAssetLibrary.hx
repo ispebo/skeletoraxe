@@ -44,8 +44,10 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		#elseif html5
 		
-		addExternal("gfx/CrazyGator.png", "image", "gfx/CrazyGator.png");
-		addExternal("xmls/CrazyGator.xml", "text", "xmls/CrazyGator.xml");
+		path.set ("gfx/CrazyGator.png", "gfx/CrazyGator.png");
+		type.set ("gfx/CrazyGator.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("xmls/CrazyGator.xml", "xmls/CrazyGator.xml");
+		type.set ("xmls/CrazyGator.xml", Reflect.field (AssetType, "text".toUpperCase ()));
 		
 		
 		#else
@@ -100,20 +102,6 @@ class DefaultAssetLibrary extends AssetLibrary {
 		#end
 		
 	}
-	
-	
-	#if html5
-	private function addEmbed(id:String, kind:String, value:Dynamic):Void {
-		className.set(id, value);
-		type.set(id, Reflect.field(AssetType, kind.toUpperCase()));
-	}
-	
-	
-	private function addExternal(id:String, kind:String, value:String):Void {
-		path.set(id, value);
-		type.set(id, Reflect.field(AssetType, kind.toUpperCase()));
-	}
-	#end
 	
 	
 	public override function exists (id:String, type:AssetType):Bool {
@@ -266,7 +254,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		#if pixi
 		
-		return null;
+		//return null;		
 		
 		#elseif flash
 		

@@ -10,10 +10,10 @@ import haxe.Resource;
 import haxe.Timer;
 import haxe.xml.Fast;
 import skeletoraxe.atlas.AtlasStorageSkAxe;
-import skeletoraxe.atlas.MovieclipSkAxe;
+import skeletoraxe.atlas.MovieClip;
 import openfl.Assets;
 
-typedef MovieClip = skeletoraxe.atlas.MovieclipSkAxe;
+
 
 class Engine extends Sprite
 {
@@ -85,6 +85,7 @@ class Engine extends Sprite
 	{
 		if ( !_pause )
 		{
+			
 			_pause = !_pause;
 			this.removeEventListener( Event.ENTER_FRAME, enterframe);	
 		}
@@ -95,14 +96,15 @@ class Engine extends Sprite
 	{
 		if ( _pause )
 		{
+			
 			_pause = !_pause;
 			this.addEventListener( Event.ENTER_FRAME, enterframe);	
 		}
 	}
 	
 	//---------------------------------------------------------------------
-	//Création d'un MovieclipSkAxe à partir du nom
-	public function newMovieClip(  nameMovie: String ) : MovieClip
+	//Création d'un MovieClip à partir du nom
+	public function createMovieClip(  nameMovie: String ) : MovieClip
 	{
 		var movie: MovieClip = _atlasStockage.getMovieByName( nameMovie );
 		if ( movie == null ) throw(":: " + nameMovie );
@@ -110,12 +112,27 @@ class Engine extends Sprite
 	}
 	
 	//---------------------------------------------------------------------
-	public function enableMovieClip( movie: MovieClip, enable: Bool  ) : Void
+	public function displayMovie( movie: MovieClip ) : Void
 	{
-		if ( enable ) _enableMovies.push( movie );
-		else _enableMovies.remove( movie );
-		movie.playing = enable;
+		if ( !movie.playing )
+		{
+			movie.removeFlag = false;
+			 _enableMovies.push( movie );
+			 movie.playing = true;
+		}
 	}
+	
+	//---------------------------------------------------------------------
+	public function unDisplayMovie( movie: MovieClip ) : Void
+	{
+		if ( movie.playing )
+		{
+			movie.removeFlag = false;
+			 _enableMovies.remove( movie );
+			 movie.playing = false;
+		}
+	}
+
 	
 	//---------------------------------------------------------------------
 	private function enterframe( e: Event  ) : Void { }

@@ -22,6 +22,8 @@ class AtlasStorageSkAxe
 	private var _originalMovieClipsAtlas		: Map<String, MovieClip>;//On stocke tous les movieclips du jeu
 	
 	public static  var BUFFER					: Int = 50; //Max de movieclips dans la pool
+	public static  var SAMES_ENTITIES_MAX		: Int = 5; 
+	
 	private var _pool							: Array<MovieClip>;
 	private var _toLoad							: Int;
 	
@@ -41,7 +43,9 @@ class AtlasStorageSkAxe
 		{
 			
 			var originMovie: MovieClip = _originalMovieClipsAtlas.get(id); 
+			if ( originMovie == null ) throw(" error  "+id);
 			movie = new MovieClip( id, originMovie.ipbAtlas, originMovie.framesConfig );
+			if ( movie == null ) throw("nulo: " + id);
 		}
 		
 		return movie;
@@ -62,7 +66,7 @@ class AtlasStorageSkAxe
 				i++;
 			}
 			
-			destroyMovie = (counter >= 3);
+			destroyMovie = (counter >= SAMES_ENTITIES_MAX);
 			if ( ! destroyMovie ) _pool.push( movie );	
 			
 			
@@ -86,16 +90,12 @@ class AtlasStorageSkAxe
 		}
 		return movie;
 	}
-	//-------------------------------------------------------------------
-	private function duplicateIPBAtlas( ipbAtlas: AtlasSkAxe ) : AtlasSkAxe
-	{
-		return new AtlasSkAxe( ipbAtlas.id, ipbAtlas.atlasBMP, ipbAtlas.atlasConfig );
-	}
+	
 	//-------------------------------------------------------------------
 	//Possibilité de le charger dynamiquement
 	public function addAtlasByUrl( urlXml: String, urlBmp: String ) 
 	{
-	trace("ADD: " + urlXml + "<->" + urlBmp);
+
 		loadConfigXml( urlXml );
 		loadImage( urlBmp );
 	}
@@ -191,7 +191,7 @@ class AtlasStorageSkAxe
 							//trace("xy: " + aC);
 						}
 						
-						ipbAtlas = new AtlasSkAxe( idAtlas, _bitmap, atlasConfig);
+						ipbAtlas = new AtlasSkAxe( idAtlas, _bitmap.bitmapData, atlasConfig);
 						
 					case "anim":
 						
@@ -238,7 +238,8 @@ class AtlasStorageSkAxe
 				}
 				
 			}
-			
+			 _bitmap.bitmapData.dispose();
+			 _bitmap = null;
 			_toLoad--;
 			if ( _toLoad == 0 ) _cb(  );
 			
@@ -258,7 +259,7 @@ class AtlasStorageSkAxe
 			movie.destroy(  );
 		}
 	
-		_bitmap.bitmapData.dispose();
+		if ( _bitmap != null ) _bitmap.bitmapData.dispose();
 		_bitmap = null;
 		_originalMovieClipsAtlas = null;
 	}

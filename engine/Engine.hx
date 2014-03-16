@@ -96,7 +96,6 @@ class Engine extends Sprite
 	{
 		if ( _pause )
 		{
-			
 			_pause = !_pause;
 			this.addEventListener( Event.ENTER_FRAME, enterframe);	
 		}
@@ -107,7 +106,7 @@ class Engine extends Sprite
 	public function createMovieClip(  nameMovie: String ) : MovieClip
 	{
 		var movie: MovieClip = _atlasStockage.getMovieByName( nameMovie );
-		if ( movie == null ) throw(":: " + nameMovie );
+		if ( movie == null ) throw(":: " + nameMovie);
 		return movie;
 	}
 	

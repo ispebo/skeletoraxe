@@ -200,7 +200,7 @@ class MovieClip extends Sprite
 			if ( texture == null  )
 			{
 				var bmpData: BitmapData = _ipbAtlas.getTextureById( idTexture );
-				texture = new Bitmap( bmpData.clone() );
+				texture = new Bitmap( bmpData );
 				texture.smoothing = true;
 				texture.name = "" + newIDTexture;
 				_texturesCreated.set( newIDTexture, texture );

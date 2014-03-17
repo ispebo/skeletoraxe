@@ -1,0 +1,11 @@
+{     
+  "name": "skeletoraxe",   
+  "url" : "https://github.com/ispebo/skeletoraxe",  
+  "license": "MIT",  
+  "tags": ["haxe", "skeletoraxe"],  
+   "description": "Libraries to use an skeleton animation method ( need skeletoraxe converter )",  
+   "version": "1.0.2",    
+   "releasenote": "Currently Windows only",    
+   "contributors": ["ispebo"],    
+   "dependencies": {} 
+}     

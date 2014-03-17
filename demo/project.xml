@@ -26,8 +26,13 @@
 	<haxedef name="alcon" if="flash" />
 	<haxedef name="html5" if="html5" />
 	<haxedef name="mobile"/>
+	<!--
 	<assets path="lib/assets/anims" rename="gfx" include="*.png|*.jpg" />
 	<assets path="lib/assets/anims" rename="xmls" include="*.xml" />
+	-->
+	
+	<assets path="lib/assets/animsPNG" rename="gfx" include="*.png|*.jpg" />
+	<assets path="lib/assets/animsPNG" rename="xmls" include="*.xml" />
 	
 	<icon path="lib/assets/icon.svg"/>
 </project>

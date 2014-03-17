@@ -88,7 +88,9 @@ class Main extends Engine
 	//On insère tous les Movieclips en Atlas à charger
 	private function setSkeletalAtlas() : Void
 	{
-		addSkeletalAtlas("xmls/CrazyGator.xml", "gfx/CrazyGator.png");
+		//addSkeletalAtlas("xmls/CrazyGator.xml", "gfx/CrazyGator.png");
+		addSkeletalPNGs("xmls/crocoPNG.xml", "gfx/crocoPNG.png");
+		
 	
 	}
 	

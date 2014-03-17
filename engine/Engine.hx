@@ -5,6 +5,9 @@ import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Loader;
 import flash.display.Sprite;
+import flash.system.System;
+
+
 import flash.events.Event;
 import haxe.Resource;
 import haxe.Timer;
@@ -17,6 +20,10 @@ import openfl.Assets;
 
 class Engine extends Sprite
 {
+	public  var _memoryMax								: Int = -1;
+	private var _memoryClearnerCounter					: Int;
+	private var _fpsTimeToClean							: Int;
+	
 	private var _atlasStockage							: AtlasStorageSkAxe;
 	private var _moviesToLoad							: Array<Dynamic>;
 	
@@ -33,9 +40,24 @@ class Engine extends Sprite
 		super();
 		_pause = true;
 		_loading = false;
+		
+		
 		_moviesToLoad = new Array();
 		_enableMovies = new Array();
 		_atlasStockage = new AtlasStorageSkAxe( loadMovie );
+		
+		
+	}
+	//---------------------------------------------------------------------
+	//On met une limite pour la mémoire
+	public function setMemoryMax( n : Int, timeToClean: Int = 400 ) : Void
+	{
+		if ( n > 0 ) 
+		{
+			_memoryMax = n;
+			_fpsTimeToClean = timeToClean;
+			_memoryClearnerCounter = 0;
+		}
 	}
 	
 	//---------------------------------------------------------------------
@@ -44,6 +66,29 @@ class Engine extends Sprite
 		loading = true;
 		_moviesToLoad.push( { xml: urlXml, bmp: urlPng } );
 	}
+	
+	//---------------------------------------------------------------------
+	public function addSkeletalPNGs(  urlXml: String, urlPngs: String  ) : Void
+	{
+	
+		var idName: Array<String> = urlPngs.split(".");
+		var pngsName: Array<String> = new Array();
+		
+		var xmlParsed: Xml = Xml.parse(Assets.getText( urlXml ));
+
+		var n: Int = Std.parseInt( xmlParsed.firstElement().get("n"));
+		for ( i in 0 ... n )
+		{
+			var nam: String = idName[0] + "__" + (i + 1) + "." + idName[1];
+			pngsName.push( nam );
+			
+		}
+		
+		loading = true;
+		_moviesToLoad.push( { xml: xmlParsed, pngs: pngsName } );
+	}
+	
+	
 	//---------------------------------------------------------------------
 	//On essaie de charger le prochain Movieclip. Si tout est charger alors on fait appel à LOADING = true;
 	private function loadMovie() : Void
@@ -52,7 +97,19 @@ class Engine extends Sprite
 		{
 			var m: Dynamic = _moviesToLoad[0];
 			_moviesToLoad.splice(0, 1);
-			_atlasStockage.addAtlas( Xml.parse(Assets.getText( m.xml )), new Bitmap( Assets.getBitmapData( m.bmp ) ) );
+			if (  m.bmp != null ) 
+			{
+				_atlasStockage.addAtlas( Xml.parse(Assets.getText( m.xml )), new Bitmap( Assets.getBitmapData( m.bmp ) ) );
+			}
+			else if ( m.pngs != null )
+			{
+				var pngs: Array<String> = m.pngs;
+				var allBmpData: Array<BitmapData> = new Array();
+				for ( png in pngs ) allBmpData.push( Assets.getBitmapData( png ) );
+				
+				_atlasStockage.addAtlasByPNG( m.xml, allBmpData );
+			}
+			else throw("ERROR: no mode PNGs, no mode Atlas");
 		}
 		else loading = false;
 	}
@@ -76,6 +133,7 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	public function start() : Void
 	{
+		_memoryClearnerCounter = 0;
 		playEngine();
 		
 	}
@@ -85,7 +143,6 @@ class Engine extends Sprite
 	{
 		if ( !_pause )
 		{
-			
 			_pause = !_pause;
 			this.removeEventListener( Event.ENTER_FRAME, enterframe);	
 		}
@@ -102,39 +159,52 @@ class Engine extends Sprite
 	}
 	
 	//---------------------------------------------------------------------
-	//Création d'un MovieClip à partir du nom
-	public function createMovieClip(  nameMovie: String ) : MovieClip
-	{
-		var movie: MovieClip = _atlasStockage.getMovieByName( nameMovie );
-		if ( movie == null ) throw(":: " + nameMovie);
-		return movie;
-	}
+	//Création d'un Movieclip à partir du nom
+	public function createMovieClip(  nameMovie: String ) : MovieClip {	return _atlasStockage.getMovieByName( nameMovie ); }
 	
 	//---------------------------------------------------------------------
 	public function displayMovie( movie: MovieClip ) : Void
 	{
-		if ( !movie.playing )
+		if ( !movie.playing  )
 		{
+			
+			_enableMovies.push( movie );
 			movie.removeFlag = false;
-			 _enableMovies.push( movie );
-			 movie.playing = true;
+			movie.playing = true;
 		}
 	}
 	
 	//---------------------------------------------------------------------
 	public function unDisplayMovie( movie: MovieClip ) : Void
 	{
-		if ( movie.playing )
+		if ( movie.playing  )
 		{
+			_enableMovies.remove( movie );
 			movie.removeFlag = false;
-			 _enableMovies.remove( movie );
-			 movie.playing = false;
+			movie.playing = false;
 		}
 	}
-
 	
 	//---------------------------------------------------------------------
-	private function enterframe( e: Event  ) : Void { }
+	private function enterframe( e: Event  ) : Void 
+	{ 
+		updateMemoryCleaner();
+	}
+	//---------------------------------------------------------------------
+	private function updateMemoryCleaner() : Void
+	{
+		if ( _memoryMax	> 0 )
+		{
+			_memoryClearnerCounter++;
+			if ( _memoryClearnerCounter >= _fpsTimeToClean )
+			{
+				
+				_memoryClearnerCounter = 0;
+				var currentMemory: Int = Std.int (  System.totalMemory / 1048576 );
+				if ( currentMemory >= _memoryMax ) System.gc();
+			}
+		}
+	}
 	//--------------------------------------------------------------------------------
 	public function destroy(): Void
 	{

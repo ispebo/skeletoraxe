@@ -111,8 +111,7 @@ class MovieClip extends Sprite
 		{
 			_isPlaying = b;
 			if ( _isPlaying ) update();
-			//if ( _isPlaying ) this.addEventListener( Event.ENTER_FRAME, enterframe );
-			//else this.removeEventListener( Event.ENTER_FRAME, enterframe );
+		
 		}
 		return _isPlaying;
 	}
@@ -153,20 +152,15 @@ class MovieClip extends Sprite
 	//---------------------------------------------------------------
 	private function get_totalFrames() : Int { return _framesConfig.length; }
 	//-----------------------------------------------------------
-	
-/*	private function enterframe( e: flash.events.Event ) : Void
-	{
-		if ( _isPlaying ) update();
-		
-	}*/
-	//---------------------------------------------------------------
+
 	public function update(  ) : Void
 	{
+		
 		if ( _isPlaying )
 		{
 			if ( reversingMode ) 
 			{
-				if ( !prevFrame() ) gotoAndPlay(totalFrames);
+				if ( !prevFrame() ) gotoAndPlay(totalFrames - 1);
 			}
 			else
 			{	
@@ -213,14 +207,13 @@ class MovieClip extends Sprite
 			c += 10000;
 			counter.set( idTexture, c );
 			attached.push( newIDTexture );
-			if ( !this.contains( texture ) ) this.addChild( texture );
+			this.addChild( texture );
 			
 			var matrix1: Matrix = obj.matrix;
 			var matrix2: Matrix = texture.transform.matrix;
 		
 			if ( matrix1.a != matrix2.a || matrix1.b != matrix2.b || matrix1.c != matrix2.c || matrix1.d != matrix2.d || matrix1.tx != matrix2.tx || matrix1.ty != matrix2.ty )
 				texture.transform.matrix = obj.matrix;
-			
 		}
 		
 	
@@ -240,14 +233,13 @@ class MovieClip extends Sprite
 	//---------------------------------------------------------------
 	public function gotoAndStop( frameToGo: Int, playAnimation: Bool = false ) : Void
 	{
-		//if ( frameToGo == 0 ) frameToGo = 1;
+		if ( frameToGo < 0 ) frameToGo = _framesConfig.length;
 		
 		if ( _framesConfig.length >= frameToGo ) _currentFrame = frameToGo;
-		else _currentFrame = _framesConfig.length;
+		else _currentFrame = _framesConfig.length-1;
 	
 		playing = playAnimation;
 		displayBitmap();
-		
 	}
 	//---------------------------------------------------------------
 	public function play() : Void {	gotoAndPlay( _currentFrame );	}
@@ -270,12 +262,14 @@ class MovieClip extends Sprite
 	public function prevFrame() : Bool 
 	{
 		var ok : Bool = false;
-		if ( _currentFrame > 2 )
+		if ( _currentFrame > 0 )
 		{
 			_currentFrame--;
+			
 			displayBitmap();
 			ok = true;
 		}
+		
 		return ok;
 	}
 	//---------------------------------------------------------------

@@ -53,9 +53,14 @@ class AtlasSkAxe
 		//-----------------------------------------------------------
 	public function createByPNGs( pngs: Array<BitmapData> ) : Void
 	{
+		if ( pngs == null ) throw("kkk");
+		if ( pngs.length == 0 ) throw("ppp");
 		_textures = new Map();
 		for ( i in 0 ... pngs.length )
+		{
+			if ( pngs[i] == null ) throw( "==> " + i);
 			_textures.set( (i + 1), pngs[i] );
+		}
 			
 		
 		

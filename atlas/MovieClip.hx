@@ -88,7 +88,8 @@ class MovieClip extends Sprite
 				var fC: TextureFrameConfig = {
 					textureData: frame.textureData,
 					matrix: frame.matrix,
-					frame: frame.frame
+					frame: frame.frame,
+					alpha: frame.alpha
 				}
 				tab2.push( fC );
 			}
@@ -110,8 +111,8 @@ class MovieClip extends Sprite
 		if ( _isPlaying != b )
 		{
 			_isPlaying = b;
-			if ( _isPlaying ) update();
-		
+			//if ( _isPlaying ) this.addEventListener( Event.ENTER_FRAME, enterframe );
+			//else this.removeEventListener( Event.ENTER_FRAME, enterframe );
 		}
 		return _isPlaying;
 	}
@@ -152,25 +153,28 @@ class MovieClip extends Sprite
 	//---------------------------------------------------------------
 	private function get_totalFrames() : Int { return _framesConfig.length; }
 	//-----------------------------------------------------------
-
+	
+/*	private function enterframe( e: flash.events.Event ) : Void
+	{
+		if ( _isPlaying ) update();
+		
+	}*/
+	//---------------------------------------------------------------
 	public function update(  ) : Void
 	{
-		
 		if ( _isPlaying )
 		{
 			if ( reversingMode ) 
 			{
-				if ( !prevFrame() ) gotoAndPlay(totalFrames - 1);
+				if ( !prevFrame() ) gotoAndPlay(totalFrames);
 			}
 			else
 			{	
 				if ( !nextFrame() ) gotoAndPlay(0);
 			}
 			
-			
 			var currentScript : Dynamic = _framesScript.get(_currentFrame );
 				
-		
 			//On execute le script de la frame en cours
 			if ( currentScript != null ) currentScript();
 		}
@@ -198,10 +202,10 @@ class MovieClip extends Sprite
 			{
 				var bmpData: BitmapData = _ipbAtlas.getTextureById( idTexture );
 				texture = new Bitmap( bmpData );
+			
 				texture.smoothing = true;
 				texture.name = "" + newIDTexture;
 				_texturesCreated.set( newIDTexture, texture );
-				
 			}
 			
 			c += 10000;
@@ -211,9 +215,9 @@ class MovieClip extends Sprite
 			
 			var matrix1: Matrix = obj.matrix;
 			var matrix2: Matrix = texture.transform.matrix;
-		
 			if ( matrix1.a != matrix2.a || matrix1.b != matrix2.b || matrix1.c != matrix2.c || matrix1.d != matrix2.d || matrix1.tx != matrix2.tx || matrix1.ty != matrix2.ty )
 				texture.transform.matrix = obj.matrix;
+			texture.alpha = obj.alpha;
 		}
 		
 	
@@ -233,13 +237,14 @@ class MovieClip extends Sprite
 	//---------------------------------------------------------------
 	public function gotoAndStop( frameToGo: Int, playAnimation: Bool = false ) : Void
 	{
-		if ( frameToGo < 0 ) frameToGo = _framesConfig.length;
+		//if ( frameToGo == 0 ) frameToGo = 1;
 		
 		if ( _framesConfig.length >= frameToGo ) _currentFrame = frameToGo;
-		else _currentFrame = _framesConfig.length-1;
+		else _currentFrame = _framesConfig.length;
 	
 		playing = playAnimation;
 		displayBitmap();
+		
 	}
 	//---------------------------------------------------------------
 	public function play() : Void {	gotoAndPlay( _currentFrame );	}
@@ -249,7 +254,6 @@ class MovieClip extends Sprite
 	public function nextFrame() : Bool 
 	{
 		var ok : Bool = false;
-		
 		if ( _currentFrame < _framesConfig.length-1 )
 		{
 			_currentFrame++;
@@ -262,23 +266,33 @@ class MovieClip extends Sprite
 	public function prevFrame() : Bool 
 	{
 		var ok : Bool = false;
-		if ( _currentFrame > 0 )
+		if ( _currentFrame > 2 )
 		{
 			_currentFrame--;
-			
 			displayBitmap();
 			ok = true;
 		}
-		
 		return ok;
 	}
 	//---------------------------------------------------------------
 	public function destroy( ) : Void
 	{
 		playing = false;
-		_framesScript = null;
-		_ipbAtlas = null;
+		/*for (key in _texturesCreated.keys()) 
+		{
+			var bmp: Bitmap = _texturesCreated.get( key );
+			bmp.bitmapData.dispose();
+			bmp = null;
+			
+		}
 		_texturesCreated = null;
+		*/
+		//_ipbAtlas = null;
 		_framesConfig = null;
+		
+		
+		
+		
+		
 	}
 }

@@ -70,7 +70,7 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	public function addSkeletalPNGs(  urlXml: String, urlPngs: String  ) : Void
 	{
-	
+		
 		var idName: Array<String> = urlPngs.split(".");
 		var pngsName: Array<String> = new Array();
 		

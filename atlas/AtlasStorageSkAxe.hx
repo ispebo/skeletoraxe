@@ -1,6 +1,7 @@
 package skeletoraxe.atlas;
 
 import flash.display.Bitmap;
+import flash.display.BitmapData;
 import flash.display.DisplayObjectContainer;
 import flash.display.Loader;
 import flash.events.Event;
@@ -17,6 +18,7 @@ class AtlasStorageSkAxe
 {
 	private var _cb								: Void->Void;
 	private var _bitmap							: Bitmap;
+	private var _pngs							: Array<BitmapData>;
 	private var _xml							: Xml;
 	
 	private var _originalMovieClipsAtlas		: Map<String, MovieClip>;//On stocke tous les movieclips du jeu
@@ -155,11 +157,19 @@ class AtlasStorageSkAxe
 		_bitmap = bmp;
 		parse();
 	}
+	
+	//Possibilité de lui donner directement les données nécessaires
+	public function addAtlasByPNG( xml: Xml, pngs: Array<BitmapData> ) 
+	{
+		_xml = xml;
+		_pngs = pngs;
+		parse();
+	}
 	//-------------------------------------------------------------------
 	private function parse() : Void
 	{		
 	
-		if ( _xml != null && _bitmap != null ) 
+		if ( _xml != null && (_bitmap != null || _pngs != null ) ) 
 		{
 			_toLoad++;
 			var ipbAtlas: AtlasSkAxe = null;
@@ -191,7 +201,17 @@ class AtlasStorageSkAxe
 							//trace("xy: " + aC);
 						}
 					
-						ipbAtlas = new AtlasSkAxe( idAtlas, _bitmap.bitmapData, atlasConfig);
+						ipbAtlas = new AtlasSkAxe( idAtlas );
+						ipbAtlas.createByAtlas( _bitmap.bitmapData, atlasConfig );
+						_bitmap.bitmapData.dispose();
+						_bitmap = null;
+						
+					case "pngs":
+						
+						ipbAtlas = new AtlasSkAxe( 1 );
+						ipbAtlas.createByPNGs( _pngs );
+						_pngs = null;
+						
 						
 					case "anim":
 						
@@ -240,8 +260,9 @@ class AtlasStorageSkAxe
 				}
 				
 			}
-			 _bitmap.bitmapData.dispose();
-			 _bitmap = null;
+			_xml = null;
+			 //_bitmap.bitmapData.dispose();
+			 //_bitmap = null;
 			_toLoad--;
 			if ( _toLoad == 0 ) _cb(  );
 			

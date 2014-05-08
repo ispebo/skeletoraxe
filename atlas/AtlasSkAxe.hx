@@ -40,13 +40,27 @@ class AtlasSkAxe
 	private var _atlasConfig				: Array<AtlasConfig>;
 	
 	
-	public function new( ident: Int, atlasBmp: BitmapData, atlasConfig: Array<AtlasConfig> ) : Void
+	public function new( ident: Int ) : Void 
 	{
 		_id = ident;
 	
+	}
+	//-----------------------------------------------------------
+	public function createByAtlas(  atlasBmp: BitmapData, atlasConfig: Array<AtlasConfig> ) : Void
+	{
 		_atlasBMP = atlasBmp;
-		_atlasConfig = atlasConfig;
+		
 		createTextures( atlasConfig );
+	}
+		
+	//-----------------------------------------------------------
+	public function createByPNGs( pngs: Array<BitmapData> ) : Void
+	{
+		_textures = new Map();
+		for ( i in 0 ... pngs.length )
+			_textures.set( (i + 1), pngs[i] );
+			
+		
 		
 	}
 	//-----------------------------------------------------------

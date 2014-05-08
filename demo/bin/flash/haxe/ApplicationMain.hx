@@ -9,7 +9,9 @@ import flash.events.Event;
 class ApplicationMain {
 
 	static var mPreloader:NMEPreloader;
-
+	
+	public static var url_assets:String = "";
+	
 	public static function main() {
 		
 		
@@ -24,6 +26,8 @@ class ApplicationMain {
 		
 		flash.Lib.current.stage.align = flash.display.StageAlign.TOP_LEFT;
 		flash.Lib.current.stage.scaleMode = flash.display.StageScaleMode.NO_SCALE;
+		
+		url_assets = #if prod flash.Lib.current.loaderInfo.parameters.urlMedia; #else ""; #end
 		
 		if (loaded < total || true) /* Always wait for event */ {
 			call_real = false;
@@ -138,7 +142,7 @@ class DocumentClass {
 				var method = macro {
 					return flash.Lib.current.stage;
 				}
-				fields.push ({ name: "get_stage", access: [ APrivate ], meta: [ { name: ":getter", params: [ macro stage ], pos: Context.currentPos() } ], kind: FFun({ args: [], expr: method, params: [], ret: macro :flash.display.Stage }), pos: Context.currentPos() });
+				fields.push ({ name: "get_stage", access: [ APrivate/*, AOverride*/ ], meta: [ { name: ":getter", params: [ macro stage ], pos: Context.currentPos() } ], kind: FFun({ args: [], expr: method, params: [], ret: macro :flash.display.Stage }), pos: Context.currentPos() });
 				return fields;
 			}
 			searchTypes = searchTypes.superClass.t.get();

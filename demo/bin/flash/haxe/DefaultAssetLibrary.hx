@@ -36,18 +36,94 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		#if flash
 		
-		className.set ("gfx/CrazyGator.png", __ASSET__gfx_crazygator_png);
-		type.set ("gfx/CrazyGator.png", Reflect.field (AssetType, "image".toUpperCase ()));
-		className.set ("xmls/CrazyGator.xml", __ASSET__xmls_crazygator_xml);
-		type.set ("xmls/CrazyGator.xml", Reflect.field (AssetType, "text".toUpperCase ()));
+		className.set ("gfx/crocoPNG__1.png", __ASSET__gfx_crocopng__1_png);
+		type.set ("gfx/crocoPNG__1.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__10.png", __ASSET__gfx_crocopng__10_png);
+		type.set ("gfx/crocoPNG__10.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__11.png", __ASSET__gfx_crocopng__11_png);
+		type.set ("gfx/crocoPNG__11.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__12.png", __ASSET__gfx_crocopng__12_png);
+		type.set ("gfx/crocoPNG__12.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__13.png", __ASSET__gfx_crocopng__13_png);
+		type.set ("gfx/crocoPNG__13.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__14.png", __ASSET__gfx_crocopng__14_png);
+		type.set ("gfx/crocoPNG__14.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__15.png", __ASSET__gfx_crocopng__15_png);
+		type.set ("gfx/crocoPNG__15.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__16.png", __ASSET__gfx_crocopng__16_png);
+		type.set ("gfx/crocoPNG__16.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__17.png", __ASSET__gfx_crocopng__17_png);
+		type.set ("gfx/crocoPNG__17.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__18.png", __ASSET__gfx_crocopng__18_png);
+		type.set ("gfx/crocoPNG__18.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__19.png", __ASSET__gfx_crocopng__19_png);
+		type.set ("gfx/crocoPNG__19.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__2.png", __ASSET__gfx_crocopng__2_png);
+		type.set ("gfx/crocoPNG__2.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__20.png", __ASSET__gfx_crocopng__20_png);
+		type.set ("gfx/crocoPNG__20.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__3.png", __ASSET__gfx_crocopng__3_png);
+		type.set ("gfx/crocoPNG__3.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__4.png", __ASSET__gfx_crocopng__4_png);
+		type.set ("gfx/crocoPNG__4.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__5.png", __ASSET__gfx_crocopng__5_png);
+		type.set ("gfx/crocoPNG__5.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__6.png", __ASSET__gfx_crocopng__6_png);
+		type.set ("gfx/crocoPNG__6.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__7.png", __ASSET__gfx_crocopng__7_png);
+		type.set ("gfx/crocoPNG__7.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__8.png", __ASSET__gfx_crocopng__8_png);
+		type.set ("gfx/crocoPNG__8.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("gfx/crocoPNG__9.png", __ASSET__gfx_crocopng__9_png);
+		type.set ("gfx/crocoPNG__9.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("xmls/crocoPNG.xml", __ASSET__xmls_crocopng_xml);
+		type.set ("xmls/crocoPNG.xml", Reflect.field (AssetType, "text".toUpperCase ()));
 		
 		
 		#elseif html5
 		
-		path.set ("gfx/CrazyGator.png", "gfx/CrazyGator.png");
-		type.set ("gfx/CrazyGator.png", Reflect.field (AssetType, "image".toUpperCase ()));
-		path.set ("xmls/CrazyGator.xml", "xmls/CrazyGator.xml");
-		type.set ("xmls/CrazyGator.xml", Reflect.field (AssetType, "text".toUpperCase ()));
+		path.set ("gfx/crocoPNG__1.png", "gfx/crocoPNG__1.png");
+		type.set ("gfx/crocoPNG__1.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__10.png", "gfx/crocoPNG__10.png");
+		type.set ("gfx/crocoPNG__10.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__11.png", "gfx/crocoPNG__11.png");
+		type.set ("gfx/crocoPNG__11.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__12.png", "gfx/crocoPNG__12.png");
+		type.set ("gfx/crocoPNG__12.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__13.png", "gfx/crocoPNG__13.png");
+		type.set ("gfx/crocoPNG__13.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__14.png", "gfx/crocoPNG__14.png");
+		type.set ("gfx/crocoPNG__14.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__15.png", "gfx/crocoPNG__15.png");
+		type.set ("gfx/crocoPNG__15.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__16.png", "gfx/crocoPNG__16.png");
+		type.set ("gfx/crocoPNG__16.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__17.png", "gfx/crocoPNG__17.png");
+		type.set ("gfx/crocoPNG__17.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__18.png", "gfx/crocoPNG__18.png");
+		type.set ("gfx/crocoPNG__18.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__19.png", "gfx/crocoPNG__19.png");
+		type.set ("gfx/crocoPNG__19.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__2.png", "gfx/crocoPNG__2.png");
+		type.set ("gfx/crocoPNG__2.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__20.png", "gfx/crocoPNG__20.png");
+		type.set ("gfx/crocoPNG__20.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__3.png", "gfx/crocoPNG__3.png");
+		type.set ("gfx/crocoPNG__3.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__4.png", "gfx/crocoPNG__4.png");
+		type.set ("gfx/crocoPNG__4.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__5.png", "gfx/crocoPNG__5.png");
+		type.set ("gfx/crocoPNG__5.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__6.png", "gfx/crocoPNG__6.png");
+		type.set ("gfx/crocoPNG__6.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__7.png", "gfx/crocoPNG__7.png");
+		type.set ("gfx/crocoPNG__7.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__8.png", "gfx/crocoPNG__8.png");
+		type.set ("gfx/crocoPNG__8.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("gfx/crocoPNG__9.png", "gfx/crocoPNG__9.png");
+		type.set ("gfx/crocoPNG__9.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		path.set ("xmls/crocoPNG.xml", "xmls/crocoPNG.xml");
+		type.set ("xmls/crocoPNG.xml", Reflect.field (AssetType, "text".toUpperCase ()));
 		
 		
 		#else
@@ -491,11 +567,49 @@ class DefaultAssetLibrary extends AssetLibrary {
 #if pixi
 #elseif flash
 
-class __ASSET__gfx_crazygator_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
-class __ASSET__xmls_crazygator_xml extends flash.utils.ByteArray { }
+class __ASSET__gfx_crocopng__1_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__10_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__11_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__12_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__13_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__14_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__15_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__16_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__17_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__18_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__19_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__2_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__20_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__3_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__4_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__5_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__6_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__7_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__8_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__gfx_crocopng__9_png extends flash.display.BitmapData { public function new () { super (0, 0); } }
+class __ASSET__xmls_crocopng_xml extends flash.utils.ByteArray { }
 
 
 #elseif html5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

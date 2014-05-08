@@ -142,8 +142,8 @@ class AtlasStorageSkAxe
 		var i : Iterator<String> = _originalMovieClipsAtlas.keys();		
 		while( i.hasNext() )
 		{
-			var movie: MovieClip = _originalMovieClipsAtlas.get( i.next() );
-			movies.push( movie );
+			//var movie: MovieClip = _originalMovieClipsAtlas.get( i.next() );
+			movies.push( _originalMovieClipsAtlas.get( i.next() ) );
 		}
 		
 		return movies;
@@ -240,7 +240,7 @@ class AtlasStorageSkAxe
 								newMatrix.d = Std.parseFloat( mat[3] );
 								newMatrix.tx = Std.parseFloat( mat[4] );
 								newMatrix.ty = Std.parseFloat( mat[5] );
-								
+								mat = null;
 								
 								
 								var frameConfig:  TextureFrameConfig = {
@@ -261,8 +261,7 @@ class AtlasStorageSkAxe
 				
 			}
 			_xml = null;
-			 //_bitmap.bitmapData.dispose();
-			 //_bitmap = null;
+			
 			_toLoad--;
 			if ( _toLoad == 0 ) _cb(  );
 			

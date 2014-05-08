@@ -144,7 +144,7 @@ class Engine extends Sprite
 		if ( !_pause )
 		{
 			_pause = !_pause;
-			this.removeEventListener( Event.ENTER_FRAME, enterframe);	
+			stopEngine();
 		}
 	}
 	//---------------------------------------------------------------------
@@ -153,9 +153,15 @@ class Engine extends Sprite
 	{
 		if ( _pause )
 		{
+			
 			_pause = !_pause;
 			this.addEventListener( Event.ENTER_FRAME, enterframe);	
 		}
+	}
+	//---------------------------------------------------------------------
+	public function stopEngine() : Void
+	{
+		this.removeEventListener( Event.ENTER_FRAME, enterframe);	
 	}
 	
 	//---------------------------------------------------------------------
@@ -189,6 +195,7 @@ class Engine extends Sprite
 	private function enterframe( e: Event  ) : Void 
 	{ 
 		updateMemoryCleaner();
+		updateEnableMovies();
 	}
 	//---------------------------------------------------------------------
 	private function updateMemoryCleaner() : Void
@@ -203,6 +210,21 @@ class Engine extends Sprite
 				var currentMemory: Int = Std.int (  System.totalMemory / 1048576 );
 				if ( currentMemory >= _memoryMax ) System.gc();
 			}
+		}
+	}
+	//---------------------------------------------------------------------
+	private function updateEnableMovies() : Void
+	{
+		var i: Int = 0;
+		while ( i < _enableMovies.length )
+		{
+			var movie: MovieClip = _enableMovies[i];
+			if ( movie != null )
+			{
+				movie.update();
+				i++;
+			}
+			
 		}
 	}
 	//--------------------------------------------------------------------------------

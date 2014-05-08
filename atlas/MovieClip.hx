@@ -171,6 +171,7 @@ class MovieClip extends Sprite
 			else
 			{	
 				if ( !nextFrame() ) gotoAndPlay(0);
+				
 			}
 			
 			var currentScript : Dynamic = _framesScript.get(_currentFrame );

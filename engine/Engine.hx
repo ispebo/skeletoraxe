@@ -23,6 +23,8 @@ class Engine extends Sprite
 	public  var _memoryMax								: Int = -1;
 	private var _memoryClearnerCounter					: Int;
 	private var _fpsTimeToClean							: Int;
+	private var _fpsToUpdate							: Int;
+	private var _fpsToUpdateCounter						: Int;
 	
 	private var _atlasStockage							: AtlasStorageSkAxe;
 	private var _moviesToLoad							: Array<Dynamic>;
@@ -35,19 +37,19 @@ class Engine extends Sprite
 	private var _enableMovies							: Array<MovieClip>;
 	
 	
-	public function new()
+	public function new( )
 	{
 		super();
 		_pause = true;
 		_loading = false;
 		
-		
 		_moviesToLoad = new Array();
 		_enableMovies = new Array();
 		_atlasStockage = new AtlasStorageSkAxe( loadMovie );
-		
+		_fpsToUpdate = _fpsToUpdateCounter = 1;
 		
 	}
+	
 	//---------------------------------------------------------------------
 	//On met une limite pour la mémoire
 	public function setMemoryMax( n : Int, timeToClean: Int = 400 ) : Void
@@ -153,7 +155,6 @@ class Engine extends Sprite
 	{
 		if ( _pause )
 		{
-			
 			_pause = !_pause;
 			this.addEventListener( Event.ENTER_FRAME, enterframe);	
 		}
@@ -173,7 +174,6 @@ class Engine extends Sprite
 	{
 		if ( !movie.playing  )
 		{
-			
 			_enableMovies.push( movie );
 			movie.removeFlag = false;
 			movie.playing = true;
@@ -186,8 +186,8 @@ class Engine extends Sprite
 		if ( movie.playing  )
 		{
 			_enableMovies.remove( movie );
+			_atlasStockage.removeChildFromStage( movie );
 			movie.removeFlag = false;
-			movie.playing = false;
 		}
 	}
 	
@@ -214,18 +214,20 @@ class Engine extends Sprite
 	}
 	//---------------------------------------------------------------------
 	private function updateEnableMovies() : Void
-	{
+	{	
 		var i: Int = 0;
 		while ( i < _enableMovies.length )
 		{
 			var movie: MovieClip = _enableMovies[i];
 			if ( movie != null )
 			{
-				movie.update();
+				movie.update( _fpsToUpdateCounter == 1 );
 				i++;
 			}
-			
 		}
+		
+		_fpsToUpdateCounter++;
+		if ( _fpsToUpdateCounter > _fpsToUpdate ) _fpsToUpdateCounter = 1;
 	}
 	//--------------------------------------------------------------------------------
 	public function destroy(): Void

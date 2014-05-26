@@ -195,7 +195,7 @@ class MovieClip extends Sprite
 			c += 10000;
 			counter.set( idTexture, c );
 			
-			if ( !this.contains( texture ) ) this.addChild( texture );
+			this.addChild( texture );
 			oldAttached.remove( texture );
 			var matrix1: Matrix = obj.matrix;
 			var matrix2: Matrix = texture.transform.matrix;

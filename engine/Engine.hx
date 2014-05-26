@@ -5,6 +5,7 @@ import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Loader;
 import flash.display.Sprite;
+import flash.Lib;
 import flash.system.System;
 
 
@@ -37,6 +38,11 @@ class Engine extends Sprite
 	private var _enableMovies							: Array<MovieClip>;
 	
 	
+	private var _lastTime								: Int;
+	private var _timerStocker							: Float;
+	private var _fps									: Float;
+
+	
 	public function new( )
 	{
 		super();
@@ -48,8 +54,15 @@ class Engine extends Sprite
 		_atlasStockage = new AtlasStorageSkAxe( loadMovie );
 		_fpsToUpdate = _fpsToUpdateCounter = 1;
 		
+		
 	}
 	
+	//---------------------------------------------------------------------
+	public function setFrameRate( n : Int ) : Void
+	{
+		_fps = 1 /  n;
+		_timerStocker = 0;
+	}
 	//---------------------------------------------------------------------
 	//On met une limite pour la mémoire
 	public function setMemoryMax( n : Int, timeToClean: Int = 400 ) : Void
@@ -155,6 +168,7 @@ class Engine extends Sprite
 	{
 		if ( _pause )
 		{
+			 _lastTime = Lib.getTimer();
 			_pause = !_pause;
 			this.addEventListener( Event.ENTER_FRAME, enterframe);	
 		}
@@ -194,8 +208,31 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	private function enterframe( e: Event  ) : Void 
 	{ 
-		updateMemoryCleaner();
-		updateEnableMovies();
+		updateDeltaTime();
+	
+		var times: Int = Math.floor(_timerStocker / _fps);
+		
+		var c: Int = 0;
+		while ( _timerStocker >= _fps )
+		{
+			
+			_timerStocker -= _fps; 
+			#if local
+				updateMemoryCleaner();
+			#end
+		
+			c++;
+			updateEnableMovies( times == c );
+			
+		}
+	}
+	//---------------------------------------------------------------------
+	private function updateDeltaTime() : Void
+	{
+		var t: Int = Lib.getTimer();
+		var dt: Float = ( t - _lastTime) * 0.001;
+		_timerStocker += dt;
+		_lastTime = t;
 	}
 	//---------------------------------------------------------------------
 	private function updateMemoryCleaner() : Void
@@ -213,21 +250,25 @@ class Engine extends Sprite
 		}
 	}
 	//---------------------------------------------------------------------
-	private function updateEnableMovies() : Void
+	private function updateEnableMovies( force : Bool = true ) : Void
 	{	
 		var i: Int = 0;
+	
 		while ( i < _enableMovies.length )
 		{
 			var movie: MovieClip = _enableMovies[i];
 			if ( movie != null )
 			{
-				movie.update( _fpsToUpdateCounter == 1 );
+				movie.update( _fpsToUpdateCounter == 1 && force );
 				i++;
 			}
 		}
 		
-		_fpsToUpdateCounter++;
-		if ( _fpsToUpdateCounter > _fpsToUpdate ) _fpsToUpdateCounter = 1;
+		if ( force )
+		{
+			_fpsToUpdateCounter++;
+			if ( _fpsToUpdateCounter > _fpsToUpdate ) _fpsToUpdateCounter = 1;
+		}
 	}
 	//--------------------------------------------------------------------------------
 	public function destroy(): Void

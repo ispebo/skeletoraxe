@@ -22,6 +22,9 @@ import com.standard.log.alcon.Debug;
  
 class Main extends Engine
 {
+	private static inline var MODE_ATLAS				: Int = 1;
+	private static inline var MODE_PNGS					: Int = 2;
+	private static var MODE_LOADING						: Int = MODE_PNGS;
 	public static var STAGE								: Stage;
 	private var _animsDefinition						: Array<String> ;
 	
@@ -42,9 +45,13 @@ class Main extends Engine
 	#end
 		
 		setSkeletalAtlas();
-		AtlasStorageSkAxe.BUFFER = 30;	
+		AtlasStorageSkAxe.SAMES_ENTITIES_MAX = 0;
+		AtlasStorageSkAxe.BUFFER = 0;	
 		loadMovie();
-	
+		setFrameRate( 30 );
+		playEngine();
+		
+		
 	}
 	
 //-------------------------------------------------------------------------------------
@@ -85,13 +92,11 @@ class Main extends Engine
 	
 
 //--------------------------------------------------------------------
-	//On insère tous les Movieclips en Atlas à charger
+	//On insère tous les Movieclips en Atlas à charger en fonction du mode de chargement( Atlas ou PNGs )
 	private function setSkeletalAtlas() : Void
 	{
-		//addSkeletalAtlas("xmls/CrazyGator.xml", "gfx/CrazyGator.png");
-		addSkeletalPNGs("xmls/crocoPNG.xml", "gfx/crocoPNG.png");
-		
-	
+		if ( MODE_LOADING == MODE_ATLAS ) addSkeletalAtlas("xmls/CrocoAtlas.xml", "gfx/CrocoAtlas.png");
+		else addSkeletalPNGs("xmls/CrocoPNGS.xml", "gfx/CrocoPNGS.png");
 	}
 	
 	//---------------------------------------------------------------------
@@ -99,7 +104,6 @@ class Main extends Engine
 	override private function loadingFinish() : Void 
 	{
 		_animsDefinition = [ 
-		
 						"CrocodileHappy",
 						"CrocodileSurprised",
 						"CrocodileStones",
@@ -123,12 +127,12 @@ class Main extends Engine
 	//--------------------------------------------------------------------------
 	private function createAnim(  _x: Float, _y: Float ) : Void
 	{
+		
 		var movie: MovieClip = createMovieClip( _animsDefinition[ Std.random(_animsDefinition.length) ] );
 		addChild( movie );
 		movie.x = _x;
 		movie.y = _y;
 		displayMovie( movie  );
-		
 		movie.addFrameScript( movie.totalFrames - 1, function() 
 													{ 
 														if ( Std.random(5) == 1 ) 
@@ -145,6 +149,7 @@ class Main extends Engine
 	{
 		var i : Int = 0;
 	
+		
 		while ( i < _enableMovies.length )
 		{
 			var movie: MovieClip = _enableMovies[i];
@@ -156,6 +161,7 @@ class Main extends Engine
 			}
 			else 
 			{
+				
 				movie.update();
 				i++;
 			}

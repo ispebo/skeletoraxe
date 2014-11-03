@@ -58,9 +58,12 @@ class MovieClip extends Sprite
 	
 		reset();
 		
+	
+		
 		for ( frameConfig in _framesConfig )
 			for ( frame in frameConfig )
 			{
+				
 				var texture: BitmapData = ipbAtlas.getTextureById(frame.textureData.id);
 				if ( texture.width > _width ) _width = Std.int ( texture.width );
 				if ( texture.height > _height ) _height = Std.int ( texture.height );
@@ -109,9 +112,19 @@ class MovieClip extends Sprite
 	@:getter( cacheAsBitmap ) function getterCAB() : Bool  {	 return _cacheAsBitmap; }
 	@:setter( cacheAsBitmap ) function setterCAB( b: Bool ) : Void  
 	{ 
-		for ( bitmap in _texturesCreated ) bitmap.cacheAsBitmap = b;
+		
+		
+		for ( bitmap in _texturesCreated )
+		{
+			
+			bitmap.cacheAsBitmap = b;
+		}
 		_cacheAsBitmap = b;
 	}
+	//---------------------------------------------------------------
+	public var texturesCreated( get_texturesCreated, null ) : Map<Int,Bitmap>;
+	private function get_texturesCreated() : Map<Int,Bitmap> { return _texturesCreated;}
+	
 	//---------------------------------------------------------------
 	//On fait un 'smoothing' pour tous les bitmaps du Movieclip
 	private function get_smoothing() : Bool { return _smoothing; }
@@ -171,41 +184,45 @@ class MovieClip extends Sprite
 			var child: DisplayObject = this.getChildAt(j);
 			oldAttached.push( child );
 		}
+		var coucou: Int = 0;
 		var counter: Map<Int,Int> = new Map();
-		for (  obj in _framesConfig[_currentFrame] )
-		{
-			var idTexture: Int =  obj.textureData.id ;
-			var c: Int = 0;
-			if ( counter.exists( idTexture ) ) c = counter.get(idTexture);	
-		
-			var newIDTexture: Int = idTexture + c;
-			var texture: Bitmap =  _texturesCreated.get(newIDTexture );
-			
-			if ( texture == null  )
+		if ( currentFrame <  framesConfig.length )
+			for (  obj in _framesConfig[_currentFrame] )
 			{
-				var bmpData: BitmapData = _ipbAtlas.getTextureById( idTexture );
-				texture = new Bitmap( bmpData );
-				texture.cacheAsBitmap = false;
-				texture.smoothing = true;
-				texture.name = "" + newIDTexture;
+				coucou++;
+				if ( coucou > 200 ) throw("=> " + _currentFrame + "->" + this.id);
+				var idTexture: Int =  obj.textureData.id ;
+				var c: Int = 0;
+				if ( counter.exists( idTexture ) ) c = counter.get(idTexture);	
+			
+				var newIDTexture: Int = idTexture + c;
+				var texture: Bitmap =  _texturesCreated.get(newIDTexture );
 				
-				_texturesCreated.set( newIDTexture, texture );
+				if ( texture == null  )
+				{
+					var bmpData: BitmapData = _ipbAtlas.getTextureById( idTexture );
+					texture = new Bitmap( bmpData );
+					//texture.cacheAsBitmap = false;
+					texture.smoothing = true;
+					texture.name = "" + newIDTexture;
+					
+					_texturesCreated.set( newIDTexture, texture );
+				}
+				
+				c += 10000;
+				counter.set( idTexture, c );
+				
+				this.addChild( texture );
+				oldAttached.remove( texture );
+				var matrix1: Matrix = obj.matrix;
+				var matrix2: Matrix = texture.transform.matrix;
+				if ( matrix1.a != matrix2.a || matrix1.b != matrix2.b || matrix1.c != matrix2.c || matrix1.d != matrix2.d || matrix1.tx != matrix2.tx || matrix1.ty != matrix2.ty )
+				{
+					texture.transform.matrix = matrix1;
+				}
+				if ( texture.alpha !=  obj.alpha ) texture.alpha = obj.alpha;
 			}
 			
-			c += 10000;
-			counter.set( idTexture, c );
-			
-			this.addChild( texture );
-			oldAttached.remove( texture );
-			var matrix1: Matrix = obj.matrix;
-			var matrix2: Matrix = texture.transform.matrix;
-			if ( matrix1.a != matrix2.a || matrix1.b != matrix2.b || matrix1.c != matrix2.c || matrix1.d != matrix2.d || matrix1.tx != matrix2.tx || matrix1.ty != matrix2.ty )
-			{
-				texture.transform.matrix = matrix1;
-			}
-			if ( texture.alpha !=  obj.alpha ) texture.alpha = obj.alpha;
-		}
-		
 	
 		//On enleve ceux qui n'ont pas été attaché
 		while ( oldAttached.length > 0 )

@@ -83,24 +83,28 @@ class Engine extends Sprite
 	}
 	
 	//---------------------------------------------------------------------
-	public function addSkeletalPNGs(  urlXml: String, urlPngs: String  ) : Void
+	public function addSkeletalPNGs(  urlXml: Dynamic, urlPngs: String, openflLibrary: String = ""  ) : Void
 	{
 		
 		var idName: Array<String> = urlPngs.split(".");
 		var pngsName: Array<String> = new Array();
 		
-		var xmlParsed: Xml = Xml.parse(Assets.getText( urlXml ));
+		var xmlParsed: Xml = null;
+		if ( Std.is( urlXml, Xml) ) xmlParsed = cast(urlXml, Xml);
+		else xmlParsed = Xml.parse(Assets.getText( openflLibrary+urlXml ));
 
+		
 		var n: Int = Std.parseInt( xmlParsed.firstElement().get("n"));
 		for ( i in 0 ... n )
 		{
 			var nam: String = idName[0] + "__" + (i + 1) + "." + idName[1];
-			pngsName.push( nam );
+			pngsName.push( openflLibrary+nam );
 			
 		}
 		
 		loading = true;
 		_moviesToLoad.push( { xml: xmlParsed, pngs: pngsName } );
+		
 	}
 	
 	

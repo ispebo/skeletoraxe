@@ -1,10 +1,12 @@
 package skeletoraxe.engine;
 
 
+
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Loader;
 import flash.display.Sprite;
+import flash.errors.Error;
 import flash.Lib;
 import flash.system.System;
 
@@ -21,6 +23,7 @@ import openfl.Assets;
 
 class Engine extends Sprite
 {
+	public static inline var ENTERFRAME_ENGINE			: String = "ENTERFRAME_ENGINE";
 	public  var _memoryMax								: Int = -1;
 	private var _memoryClearnerCounter					: Int;
 	private var _fpsTimeToClean							: Int;
@@ -41,7 +44,8 @@ class Engine extends Sprite
 	private var _lastTime								: Int;
 	private var _timerStocker							: Float;
 	private var _fps									: Float;
-
+	
+	
 	
 	public function new( )
 	{
@@ -52,6 +56,8 @@ class Engine extends Sprite
 		_moviesToLoad = new Array();
 		_enableMovies = new Array();
 		_atlasStockage = new AtlasStorageSkAxe( loadMovie );
+		
+		
 		_fpsToUpdate = _fpsToUpdateCounter = 1;
 		
 		
@@ -91,7 +97,7 @@ class Engine extends Sprite
 		
 		var xmlParsed: Xml = null;
 		if ( Std.is( urlXml, Xml) ) xmlParsed = cast(urlXml, Xml);
-		else xmlParsed = Xml.parse(Assets.getText( openflLibrary+urlXml ));
+		else xmlParsed = Xml.parse(Assets.getText( urlXml ));
 
 		
 		var n: Int = Std.parseInt( xmlParsed.firstElement().get("n"));
@@ -108,9 +114,10 @@ class Engine extends Sprite
 	}
 	
 	
+	
 	//---------------------------------------------------------------------
 	//On essaie de charger le prochain Movieclip. Si tout est charger alors on fait appel à LOADING = true;
-	private function loadMovie() : Void
+	public function loadMovie() : Void
 	{
 		if ( _moviesToLoad.length > 0 ) 
 		{
@@ -118,12 +125,21 @@ class Engine extends Sprite
 			_moviesToLoad.splice(0, 1);
 			if (  m.bmp != null ) 
 			{
-				_atlasStockage.addAtlas( Xml.parse(Assets.getText( m.xml )), new Bitmap( Assets.getBitmapData( m.bmp ) ) );
+				try
+				{
+					if ( Assets.getText( m.xml ) == null ) throw("Error here");
+					_atlasStockage.addAtlas( Xml.parse(Assets.getText( m.xml )), new Bitmap( Assets.getBitmapData( m.bmp ) ) );
+				}
+				catch( e:Error )
+				{
+					throw("LoadMovie Engine Skeletoraxe: " + m);
+				}
 			}
 			else if ( m.pngs != null )
 			{
 				var pngs: Array<String> = m.pngs;
 				var allBmpData: Array<BitmapData> = new Array();
+				
 				for ( png in pngs ) allBmpData.push( Assets.getBitmapData( png ) );
 				
 				_atlasStockage.addAtlasByPNG( m.xml, allBmpData );
@@ -170,6 +186,7 @@ class Engine extends Sprite
 	//On execute les animations
 	public function playEngine() : Void
 	{
+		//trace("PLAY ENGINE: " + _pause );
 		if ( _pause )
 		{
 			 _lastTime = Lib.getTimer();
@@ -180,7 +197,9 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	public function stopEngine() : Void
 	{
-		this.removeEventListener( Event.ENTER_FRAME, enterframe);	
+		//trace("stopEngine: " + _pause );
+		if ( this.hasEventListener( Event.ENTER_FRAME ) )
+			this.removeEventListener( Event.ENTER_FRAME, enterframe);	
 	}
 	
 	//---------------------------------------------------------------------
@@ -212,8 +231,9 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	private function enterframe( e: Event  ) : Void 
 	{ 
-		updateDeltaTime();
-	
+		var dt: Float = updateDeltaTime();
+		this.dispatchEvent( new EngineEvent( ENTERFRAME_ENGINE, dt ));
+		
 		var times: Int = Math.floor(_timerStocker / _fps);
 		
 		var c: Int = 0;
@@ -229,14 +249,17 @@ class Engine extends Sprite
 			updateEnableMovies( times == c );
 			
 		}
+		
+		
 	}
 	//---------------------------------------------------------------------
-	private function updateDeltaTime() : Void
+	private function updateDeltaTime() : Float
 	{
 		var t: Int = Lib.getTimer();
 		var dt: Float = ( t - _lastTime) * 0.001;
 		_timerStocker += dt;
 		_lastTime = t;
+		return dt;
 	}
 	//---------------------------------------------------------------------
 	private function updateMemoryCleaner() : Void
@@ -284,4 +307,31 @@ class Engine extends Sprite
 
 	
 
+}
+
+//########################################################################
+class EngineEvent<T> extends flash.events.Event
+{
+	public var data( get_data, null ) : T;
+	private var _data : Dynamic;
+	
+	//------------------------------------------------
+	//	CONSTRUCTOR & DESTRUCTOR
+	//------------------------------------------------
+		
+	public function new( type:String, data: T ) 
+	{
+		super( type, false, false );
+		_data = data;
+	}
+	
+	
+	//------------------------------------------------
+	//	GETTERS & SETTERS
+	//------------------------------------------------
+	
+	private function get_data():T { return _data;}
+	
+
+	
 }

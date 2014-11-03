@@ -23,16 +23,17 @@ class AtlasStorageSkAxe
 	
 	private var _originalMovieClipsAtlas		: Map<String, MovieClip>;//On stocke tous les movieclips du jeu
 	
-	public static  var BUFFER					: Int = 50; //Max de movieclips dans la pool
-	public static  var SAMES_ENTITIES_MAX		: Int = 5; //Max de movieclips dans la pool
-	private var _pool							: Array<MovieClip>;
+	public static  var BUFFER					: Int = 0; //Max de movieclips dans la pool
+	public static  var SAMES_ENTITIES_MAX		: Int = 0; 
+	
+	private var _pool							: Map<String,Array<MovieClip>>;
 	private var _toLoad							: Int;
 	
 	public function new( cb:   Void->Void ) : Void
 	{
 		_cb = cb;
 		_originalMovieClipsAtlas = new Map();	
-		_pool = new Array();
+		_pool = new Map();
 		_toLoad = 0;
 	}
 	
@@ -42,9 +43,11 @@ class AtlasStorageSkAxe
 		var movie: MovieClip = getFromPool( id );
 		if ( movie == null )
 		{
-			
 			var originMovie: MovieClip = _originalMovieClipsAtlas.get(id); 
+			if ( originMovie == null ) throw(" error  "+id);
 			movie = new MovieClip( id, originMovie.ipbAtlas, originMovie.framesConfig );
+			if ( movie == null ) throw("nulo: " + id);
+		
 		}
 		
 		return movie;
@@ -55,18 +58,32 @@ class AtlasStorageSkAxe
 	{
 		movie.playing = false;
 		var destroyMovie: Bool = true;
-		if ( _pool.length < BUFFER )
+		var counter : Int = 0;
+		var id: String = movie.id;
+		var obj: Array<MovieClip> = null;
+		var i = _pool.keys();
+		
+		while( i.hasNext() )
 		{
-			var i : Int = 0;
-			var counter: Int = 0;
-			while ( i < _pool.length )
-			{
-				if ( _pool[i].id == movie.id ) counter++;
-				i++;
-			}
+			var key: String = i.next();
+			var tab: Array<MovieClip> = _pool.get(key);
+			if ( key == id ) obj = tab;
+			counter += tab.length;
+		}
+	
+	
+		if ( counter < BUFFER )
+		{
+			destroyMovie = false;
+			if ( obj != null ) destroyMovie =  ( obj.length >= SAMES_ENTITIES_MAX);
 			
-			destroyMovie = (counter >= SAMES_ENTITIES_MAX );
-			if ( ! destroyMovie ) _pool.push( movie );	
+			if ( !destroyMovie )
+			{
+				if ( obj == null ) obj = [movie];
+				else obj.push( movie );
+				_pool.set( id, obj );
+				movie.reset();
+			}
 		}
 		
 		if( destroyMovie )  movie.destroy();
@@ -75,16 +92,13 @@ class AtlasStorageSkAxe
 	private function getFromPool( id: String ) : MovieClip
 	{
 		var movie: MovieClip = null;
-		var i : Int = 0;
-		while ( movie == null  && i < _pool.length )
+		var obj: Array<Dynamic> = _pool.get(id);
+		if ( obj != null ) 
 		{
-			if ( _pool[i].id == id )
-			{
-				movie = _pool[i];
-				_pool.splice(i, 1);
-			}
-			i++;
+			movie = obj[0];
+			obj.splice(0, 1);
 		}
+
 		return movie;
 	}
 	
@@ -130,15 +144,14 @@ class AtlasStorageSkAxe
 	}
 	
 	//-------------------------------------------------------------------
-
 	public function getMovieClips() : Array<MovieClip>
 	{
 		var movies: Array<MovieClip> = new Array();
 		var i : Iterator<String> = _originalMovieClipsAtlas.keys();		
 		while( i.hasNext() )
 		{
-			var movie: MovieClip = _originalMovieClipsAtlas.get( i.next() );
-			movies.push( movie );
+			//var movie: MovieClip = _originalMovieClipsAtlas.get( i.next() );
+			movies.push( _originalMovieClipsAtlas.get( i.next() ) );
 		}
 		
 		return movies;
@@ -153,32 +166,27 @@ class AtlasStorageSkAxe
 		parse();
 	}
 	
-	//-------------------------------------------------------------------
 	//Possibilité de lui donner directement les données nécessaires
 	public function addAtlasByPNG( xml: Xml, pngs: Array<BitmapData> ) 
 	{
-	
 		_xml = xml;
 		_pngs = pngs;
+		
 		parse();
 	}
-	
 	//-------------------------------------------------------------------
 	private function parse() : Void
 	{		
-	
 		if ( _xml != null && (_bitmap != null || _pngs != null ) ) 
 		{
 			_toLoad++;
 			var ipbAtlas: AtlasSkAxe = null;
-		
 			
 			for (node in _xml.elements() ) 
 			{
 				
 				switch (node.nodeName )
 				{
-					
 					case "atlas":
 						var idAtlas: Int = Std.parseInt( node.get("id") );
 						
@@ -197,14 +205,13 @@ class AtlasStorageSkAxe
 								h			: Std.parseInt( wh[1] ),
 							}
 							atlasConfig.push( aC );
-						
 						}
-						
+					
 						ipbAtlas = new AtlasSkAxe( idAtlas );
 						ipbAtlas.createByAtlas( _bitmap.bitmapData, atlasConfig );
 						_bitmap.bitmapData.dispose();
 						_bitmap = null;
-					
+						
 					case "pngs":
 						
 						ipbAtlas = new AtlasSkAxe( 1 );
@@ -239,24 +246,26 @@ class AtlasStorageSkAxe
 								newMatrix.d = Std.parseFloat( mat[3] );
 								newMatrix.tx = Std.parseFloat( mat[4] );
 								newMatrix.ty = Std.parseFloat( mat[5] );
-								
+								mat = null;
 								
 								
 								var frameConfig:  TextureFrameConfig = {
 									textureData: texturData,
 									matrix	: newMatrix,
-									frame: Std.parseInt( child.get("id") )
+									frame: Std.parseInt( child.get("id") ), 
+									alpha:  Std.parseFloat( gC.get("alph") )
 								
 								}
+							
 							
 								tab.push( frameConfig );
 							}
 						}
-					
 						_originalMovieClipsAtlas.set( node.get("id"), new MovieClip(  node.get("id"), ipbAtlas, framesConfiguration) );
 				}
 				
 			}
+			_xml = null;
 			
 			_toLoad--;
 			if ( _toLoad == 0 ) _cb(  );
@@ -277,12 +286,8 @@ class AtlasStorageSkAxe
 			movie.destroy(  );
 		}
 	
-		if ( _bitmap != null ) 
-		{
-			_bitmap.bitmapData.dispose();
-			_bitmap = null;
-		}
-		
+		if ( _bitmap != null ) _bitmap.bitmapData.dispose();
+		_bitmap = null;
 		_originalMovieClipsAtlas = null;
 	}
 	

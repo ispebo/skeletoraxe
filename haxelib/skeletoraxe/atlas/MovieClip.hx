@@ -44,57 +44,36 @@ class MovieClip extends Sprite
 	
 	public var removeFlag								: Bool;
 	
-	
 	public function new( ident:String, ipbAtlas: AtlasSkAxe, framesConf: Array<Array<TextureFrameConfig>> ) : Void
 	{
 		super();
 		_id = ident;
-		removeFlag = false;
+		
 		_ipbAtlas = ipbAtlas;
 		_framesConfig = framesConf;
-		_currentFrame = -1;
-		reversingMode = false;
 		_texturesCreated = new Map();
 		cacheAsBitmap = false;
 		smoothing = false;
-		_isPlaying = false;
-		_framesScript = new Map<Int,Dynamic>();
 		_width = _height = 0;
+	
+		reset();
 		
+	
 		
 		for ( frameConfig in _framesConfig )
 			for ( frame in frameConfig )
 			{
+				
 				var texture: BitmapData = ipbAtlas.getTextureById(frame.textureData.id);
-			
 				if ( texture.width > _width ) _width = Std.int ( texture.width );
 				if ( texture.height > _height ) _height = Std.int ( texture.height );
 			}
-		
-		
 	}
+	
 	
 	//---------------------------------------------------------------------------
 	public var framesConfig (get_framesConfig, null ) : Array<Array<TextureFrameConfig>> ;
-	private function get_framesConfig( ):  Array<Array<TextureFrameConfig>> 
-	{
-		var tab: Array<Array<TextureFrameConfig>> = new Array();
-		for ( frameConfig in _framesConfig )
-		{
-			var tab2: Array<TextureFrameConfig> = new Array();
-			tab.push( tab2 );
-			for ( frame in frameConfig )
-			{
-				var fC: TextureFrameConfig = {
-					textureData: frame.textureData,
-					matrix: frame.matrix,
-					frame: frame.frame
-				}
-				tab2.push( fC );
-			}
-		}
-		return tab; 
-	};
+	private function get_framesConfig( ):  Array<Array<TextureFrameConfig>> {return _framesConfig;}
 	
 	//---------------------------------------------------------------------------
 	public var ipbAtlas( get_ipbAtlas, null ) 		: AtlasSkAxe;
@@ -107,13 +86,8 @@ class MovieClip extends Sprite
 	private function get_playing(  ) : Bool { return _isPlaying; }
 	private function set_playing( b: Bool ) : Bool
 	{
-		if ( _isPlaying != b )
-		{
-			_isPlaying = b;
-			if ( _isPlaying ) update();
-			//if ( _isPlaying ) this.addEventListener( Event.ENTER_FRAME, enterframe );
-			//else this.removeEventListener( Event.ENTER_FRAME, enterframe );
-		}
+		if ( _isPlaying != b ) _isPlaying = b;
+	
 		return _isPlaying;
 	}
 	//---------------------------------------------------------------------------------------
@@ -138,9 +112,19 @@ class MovieClip extends Sprite
 	@:getter( cacheAsBitmap ) function getterCAB() : Bool  {	 return _cacheAsBitmap; }
 	@:setter( cacheAsBitmap ) function setterCAB( b: Bool ) : Void  
 	{ 
-		for ( bitmap in _texturesCreated ) bitmap.cacheAsBitmap = b;
+		
+		
+		for ( bitmap in _texturesCreated )
+		{
+			
+			bitmap.cacheAsBitmap = b;
+		}
 		_cacheAsBitmap = b;
 	}
+	//---------------------------------------------------------------
+	public var texturesCreated( get_texturesCreated, null ) : Map<Int,Bitmap>;
+	private function get_texturesCreated() : Map<Int,Bitmap> { return _texturesCreated;}
+	
 	//---------------------------------------------------------------
 	//On fait un 'smoothing' pour tous les bitmaps du Movieclip
 	private function get_smoothing() : Bool { return _smoothing; }
@@ -154,99 +138,111 @@ class MovieClip extends Sprite
 	private function get_totalFrames() : Int { return _framesConfig.length; }
 	//-----------------------------------------------------------
 	
-/*	private function enterframe( e: flash.events.Event ) : Void
-	{
-		if ( _isPlaying ) update();
-		
-	}*/
+
 	//---------------------------------------------------------------
-	public function update(  ) : Void
+	
+	public function update( display: Bool = true  ) : Void
 	{
+		
 		if ( _isPlaying )
 		{
 			if ( reversingMode ) 
 			{
-				if ( !prevFrame() ) gotoAndPlay(totalFrames);
+				if ( !prevFrame( display ) ) gotoAndPlay(totalFrames, display);
 			}
 			else
 			{	
-				if ( !nextFrame() ) gotoAndPlay(0);
-			}
+				if ( !nextFrame( display ) ) gotoAndPlay(0, display);
 			
+			}
 			
 			var currentScript : Dynamic = _framesScript.get(_currentFrame );
 				
-		
 			//On execute le script de la frame en cours
 			if ( currentScript != null ) currentScript();
 		}
 		
 	}
 	
+	
+	//---------------------------------------------------------------
+	public function reset() : Void
+	{
+		removeFlag = false;
+		_framesScript = new Map<Int,Dynamic>();
+		_currentFrame = -1;
+		reversingMode = false;
+		_isPlaying = false;
+	}
 	//---------------------------------------------------------------
 	
 	private function displayBitmap(  ) : Void
 	{
-		var attached: Array<Int> = new Array();
-		var counter: Map<Int,Int> = new Map();
-	
-		for (  obj in _framesConfig[_currentFrame] )
+		var oldAttached: Array<DisplayObject> = new Array();
+		for ( j in 0 ... this.numChildren ) 
 		{
-			var idTexture: Int =  obj.textureData.id ;
-			var c: Int = 0;
-			if ( counter.exists( idTexture ) ) c = counter.get(idTexture);	
-		
-			var newIDTexture: Int = idTexture + c;
-		
-			var texture: Bitmap = _texturesCreated.get(newIDTexture );
-			
-			if ( texture == null  )
+			var child: DisplayObject = this.getChildAt(j);
+			oldAttached.push( child );
+		}
+		var coucou: Int = 0;
+		var counter: Map<Int,Int> = new Map();
+		if ( currentFrame <  framesConfig.length )
+			for (  obj in _framesConfig[_currentFrame] )
 			{
-				var bmpData: BitmapData = _ipbAtlas.getTextureById( idTexture );
-				texture = new Bitmap( bmpData );
-				texture.smoothing = true;
-				texture.name = "" + newIDTexture;
-				_texturesCreated.set( newIDTexture, texture );
+				coucou++;
+				if ( coucou > 200 ) throw("=> " + _currentFrame + "->" + this.id);
+				var idTexture: Int =  obj.textureData.id ;
+				var c: Int = 0;
+				if ( counter.exists( idTexture ) ) c = counter.get(idTexture);	
+			
+				var newIDTexture: Int = idTexture + c;
+				var texture: Bitmap =  _texturesCreated.get(newIDTexture );
 				
+				if ( texture == null  )
+				{
+					var bmpData: BitmapData = _ipbAtlas.getTextureById( idTexture );
+					texture = new Bitmap( bmpData );
+					//texture.cacheAsBitmap = false;
+					texture.smoothing = true;
+					texture.name = "" + newIDTexture;
+					
+					_texturesCreated.set( newIDTexture, texture );
+				}
+				
+				c += 10000;
+				counter.set( idTexture, c );
+				
+				this.addChild( texture );
+				oldAttached.remove( texture );
+				var matrix1: Matrix = obj.matrix;
+				var matrix2: Matrix = texture.transform.matrix;
+				if ( matrix1.a != matrix2.a || matrix1.b != matrix2.b || matrix1.c != matrix2.c || matrix1.d != matrix2.d || matrix1.tx != matrix2.tx || matrix1.ty != matrix2.ty )
+				{
+					texture.transform.matrix = matrix1;
+				}
+				if ( texture.alpha !=  obj.alpha ) texture.alpha = obj.alpha;
 			}
 			
-			c += 10000;
-			counter.set( idTexture, c );
-			attached.push( newIDTexture );
-			if ( !this.contains( texture ) ) this.addChild( texture );
-			
-			var matrix1: Matrix = obj.matrix;
-			var matrix2: Matrix = texture.transform.matrix;
-		
-			if ( matrix1.a != matrix2.a || matrix1.b != matrix2.b || matrix1.c != matrix2.c || matrix1.d != matrix2.d || matrix1.tx != matrix2.tx || matrix1.ty != matrix2.ty )
-				texture.transform.matrix = obj.matrix;
-			
-		}
-		
 	
 		//On enleve ceux qui n'ont pas été attaché
-		var i : Int = 0;
-		while ( i < this.numChildren )
+		while ( oldAttached.length > 0 )
 		{
-			var child: DisplayObject = this.getChildAt(i);
-			if ( !Lambda.has( attached, Std.parseInt(child.name) ) ) this.removeChildAt( i );
-			else i++;
+			this.removeChild( oldAttached[0] );
+			oldAttached.splice(0, 1);
 		}
+	
 		
 	}
-
 	//---------------------------------------------------------------
-	public function gotoAndPlay( frameToGo: Int ) : Void {	gotoAndStop( frameToGo, true );	}
+	public function gotoAndPlay( frameToGo: Int, display: Bool = true ) : Void {	gotoAndStop( frameToGo, true, display );	}
 	//---------------------------------------------------------------
-	public function gotoAndStop( frameToGo: Int, playAnimation: Bool = false ) : Void
+	public function gotoAndStop( frameToGo: Int, playAnimation: Bool = false, display: Bool = true ) : Void
 	{
-		//if ( frameToGo == 0 ) frameToGo = 1;
-		
 		if ( _framesConfig.length >= frameToGo ) _currentFrame = frameToGo;
 		else _currentFrame = _framesConfig.length;
 	
 		playing = playAnimation;
-		displayBitmap();
+		if ( display ) displayBitmap();
 		
 	}
 	//---------------------------------------------------------------
@@ -254,26 +250,27 @@ class MovieClip extends Sprite
 	//---------------------------------------------------------------
 	public function stop() : Void {	gotoAndStop( _currentFrame, false );	}
 	//---------------------------------------------------------------
-	public function nextFrame() : Bool 
+	public function nextFrame( display: Bool = true ) : Bool 
 	{
 		var ok : Bool = false;
-		
+	
 		if ( _currentFrame < _framesConfig.length-1 )
 		{
 			_currentFrame++;
-			displayBitmap();
+			if ( display ) displayBitmap();
 			ok = true;
 		}
 		return ok;
 	}
+	
 	//---------------------------------------------------------------
-	public function prevFrame() : Bool 
+	public function prevFrame( display: Bool = true ) : Bool 
 	{
 		var ok : Bool = false;
 		if ( _currentFrame > 2 )
 		{
 			_currentFrame--;
-			displayBitmap();
+			if ( display ) displayBitmap();
 			ok = true;
 		}
 		return ok;
@@ -282,9 +279,9 @@ class MovieClip extends Sprite
 	public function destroy( ) : Void
 	{
 		playing = false;
-		_framesScript = null;
-		_ipbAtlas = null;
 		_texturesCreated = null;
+		_ipbAtlas = null;
 		_framesConfig = null;
+		
 	}
 }

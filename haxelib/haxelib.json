@@ -4,7 +4,7 @@
   "license": "MIT",  
   "tags": ["haxe", "skeletoraxe"],  
    "description": "Libraries to use an skeleton animation method ( need skeletoraxe converter )",  
-   "version": "1.0.2",    
+   "version": "1.0.4",    
    "releasenote": "Currently Windows only",    
    "contributors": ["ispebo"],    
    "dependencies": {} 

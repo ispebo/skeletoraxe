@@ -20,6 +20,7 @@ typedef TextureFrameConfig = {
 	var textureData: TextureData;
 	var matrix	: Matrix;
 	var frame: Int;
+	var alpha: Float;
 }
 
 typedef AtlasConfig = {
@@ -36,6 +37,7 @@ class AtlasSkAxe
 	private var _atlasBMP					: BitmapData;
 	private var _textures					: Map<Int,BitmapData>;
 	
+	private var _atlasConfig				: Array<AtlasConfig>;
 	
 	
 	public function new( ident: Int ) : Void 
@@ -50,7 +52,8 @@ class AtlasSkAxe
 		
 		createTextures( atlasConfig );
 	}
-		//-----------------------------------------------------------
+		
+	//-----------------------------------------------------------
 	public function createByPNGs( pngs: Array<BitmapData> ) : Void
 	{
 		_textures = new Map();
@@ -60,7 +63,6 @@ class AtlasSkAxe
 		
 		
 	}
-	
 	//-----------------------------------------------------------
 	//On crée 
 	private function createTextures( atlasConfig: Array<AtlasConfig>  ) : Void
@@ -70,21 +72,27 @@ class AtlasSkAxe
 		{
 			var bmpData: BitmapData = cut( aC.x, aC.y, aC.w, aC.h );
 			_textures.set( aC.idTexture, bmpData );
-	
 		}
 		
+		_atlasBMP.dispose();
+		_atlasBMP = null;
 	}
 	//---------------------------------------------------------------------------
 	public var id (get_id, null ) : Int;
 	private function get_id( ): Int { return _id; };
 	
-
+	
+	//---------------------------------------------------------------------------
+	public var atlasConfig (get_atlasConfig, null ) : Array<AtlasConfig>;
+	private function get_atlasConfig( ):  Array<AtlasConfig> { return _atlasConfig; };
+	
 	//---------------------------------------------------------------------------
 	private function cut( _x: Float, _y: Float, _w: Int, _h: Int ) : BitmapData
 	{
 		var color =  Math.random() * 0xFFFFFF;
 		var bmpData: BitmapData = new BitmapData( _w, _h , true, cast( color));	
 		bmpData.copyPixels( _atlasBMP, new Rectangle( _x, _y, _w, _h), new Point(0, 0) );
+		
 		return bmpData;
 	}
 	//---------------------------------------------------------------------------
@@ -92,16 +100,9 @@ class AtlasSkAxe
 	{
 		return _textures.get( idTexture );
 	}
-		//---------------------------------------------------------------------------
+	//---------------------------------------------------------------------------
 	public function destroy() : Void
 	{
-		if ( _atlasBMP != null ) 
-		{
-			_atlasBMP.dispose();
-			_atlasBMP = null;
-		}
-		
-		
 		var i : Iterator<Int> = _textures.keys();		
 		while( i.hasNext() )
 		{
@@ -110,7 +111,7 @@ class AtlasSkAxe
 			
 		}
 		_textures = null;
-		
+		_atlasConfig = null;
 	}
 	
 }

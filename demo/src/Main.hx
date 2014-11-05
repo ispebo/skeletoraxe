@@ -3,6 +3,7 @@
 import flash.display.Stage;
 import flash.events.KeyboardEvent;
 import flash.events.Event;
+import tools.FPSCounter;
 
 import skeletoraxe.engine.Engine;
 import skeletoraxe.atlas.AtlasStorageSkAxe;
@@ -120,6 +121,10 @@ class Main extends Engine
 			 
 	
 		start();
+		var fpsCounter: FPSCounter = new FPSCounter();
+		addChild( fpsCounter );
+		fpsCounter.draw();
+		fpsCounter.start();
 					
 	
 	}

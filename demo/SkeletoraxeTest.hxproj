@@ -17,7 +17,7 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="..\Sooplay\z-commom_libs2" />
+    <class path="..\..\..\..\Sooplay\z-commom_libs2" />
   </classpaths>
   <!-- Build options -->
   <build>

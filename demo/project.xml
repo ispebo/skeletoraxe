@@ -19,6 +19,7 @@
 	<window fullscreen="true" resizable="true" if="android" />
 	
 	<classpath path="src" />
+	<classpath path="../../../../Sooplay/z-commom_libs2" />
 	<haxelib name="skeletoraxe" />
 	<haxelib name="openfl" />
 	<haxelib name="openfl-compatibility" />
@@ -26,6 +27,8 @@
 	<haxedef name="alcon" if="flash" />
 	<haxedef name="html5" if="html5" />
 	<haxedef name="mobile"/>
+	
+	<assets path="lib/assets/fonts" rename="fonts" />
 	
 	<assets path="lib/assets/anims" rename="gfx" include="*.png|*.jpg" />
 	<assets path="lib/assets/anims" rename="xmls" include="*.xml" />

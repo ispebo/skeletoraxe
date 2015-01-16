@@ -1,1 +1,1 @@
-cmd /k openfl test project.xml android
+cmd /k openfl test project.xml html5

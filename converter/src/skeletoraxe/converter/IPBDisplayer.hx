@@ -117,17 +117,24 @@ class IPBDisplayer extends Sprite
 	{
 		
 		_swfCurrentAnims = swfAnimations;
-		var packer:MaxRectPacker = new MaxRectPacker( _width-100, _height-100);
+		var packer:MaxRectPacker = new MaxRectPacker( _width - 100, _height - 100);
+	
+	
 		for ( swfAnim in swfAnimations ) 
 		{
+			
 			var bounds = swfAnim.getBounds( null );
-			var rect: Rectangle = packer.quickInsert(bounds.width+50, bounds.height+50);
+			
+			var rect: Rectangle = packer.quickInsert(bounds.width , bounds.height );
+			
+		
 			_swfView.addChild( swfAnim );
 			swfAnim.x = rect.x-bounds.x+100;
 			swfAnim.y = rect.y-bounds.y+100;
 			
 			
 		}
+		
 		if ( this.hasEventListener(  Event.ENTER_FRAME  ) ) this.removeEventListener( Event.ENTER_FRAME, oef );
 	}
 	

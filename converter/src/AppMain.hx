@@ -10,6 +10,7 @@ import flash.display.StageScaleMode;
 import flash.events.Event;
 import flash.Lib;
 import com.standard.log.alcon.Debug;
+import flash.utils.ByteArray;
 import skeletoraxe.converter.utils.LoaderApp;
 import skeletoraxe.converter.IPBDisplayer;
 import skeletoraxe.converter.ToolsInterface;
@@ -30,6 +31,8 @@ class AppMain extends Sprite
 	public function new()
 	{		
 		super();
+		
+		
 	}
 	
 	//-------------------------------------------------------------------------------------
@@ -60,6 +63,8 @@ class AppMain extends Sprite
 		
 		addChild( LoaderApp.instance );		
 		STAGE.addEventListener( Event.RESIZE, onResize );
+		
+	
 	}
 	
 	//-------------------------------------------------------------------------------------

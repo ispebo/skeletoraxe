@@ -4,8 +4,8 @@
 	<set name="BUILD_DIR" value="bin" />
 	<set name="WIDTH" value="1024" />
 	<set name="HEIGHT" value="960" />
-	<set name="FPS" value="40" />
-	<set name="SWF_VERSION" value="11" if="flash" />
+	<set name="FPS" value="30" />
+	<set name="SWF_VERSION" value="12.0" if="flash" />
 	<set name="FILE_NAME" value="SkeletoraxeTest" />
 	
 	<meta title="Skeletoraxe Test" package="com.ispebo.skeletoraxe" version="1.0.0" company="ispebo.com" />
@@ -27,11 +27,11 @@
 	<haxedef name="alcon" if="flash" />
 	<haxedef name="html5" if="html5" />
 	<haxedef name="mobile"/>
-	
-	<assets path="lib/assets/fonts" rename="fonts" />
+	<haxedef name="debug"/>
+	<!--<assets path="lib/assets/fonts" rename="fonts" />-->
 	
 	<assets path="lib/assets/anims" rename="gfx" include="*.png|*.jpg" />
-	<assets path="lib/assets/anims" rename="xmls" include="*.xml" />
+	<assets path="lib/assets/anims" rename="xmls" include="*.ipb" />
 	
 	
 	<assets path="lib/assets/animsPNG" rename="gfx" include="*.png|*.jpg" />

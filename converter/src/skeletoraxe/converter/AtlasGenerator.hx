@@ -280,6 +280,7 @@ class AtlasGenerator extends Sprite
 		}
 		
 		var iter : Iterator<String> = _animationFrames.keys();
+		var matrixStocker: Map<String, Matrix> = new Map();
 		while ( iter.hasNext() )
 		{
 			var key : String = iter.next();
@@ -290,13 +291,56 @@ class AtlasGenerator extends Sprite
 			{
 				c++;
 				xml += "<frm id='" + c + "'>";
+				
+				
 				if (frame != null )
 				{
 					for ( frameConfig in frame )
 					{
 						var m: Matrix = frameConfig.matrix;
-						var matrix: String = m.a + "|" + m.b + "|" + m.c + "|" + m.d + "|" + m.tx + "|" + m.ty;
-						xml += "<bmp id='"+frameConfig.textureData.id+"' mat='"+matrix+"' alph='"+frameConfig.alpha+"'/>";
+						
+						
+						var mA: String = m.a + "";
+						var mB: String = m.b + "";
+						var mC: String = m.c + "";
+						var mD: String = m.d + "";
+						var mTX: String = m.tx + "";
+						var mTY: String = m.ty + "";
+						
+						var n: Int = 6;
+						if ( mA.length > n ) mA = mA.substr(0, n);
+						if ( mB.length > n ) mB = mB.substr(0, n);
+						if ( mC.length > n ) mC = mC.substr(0, n);
+						if ( mD.length > n ) mD = mD.substr(0, n);
+						if ( mTX.length > n ) mTX = mTX.substr(0, n);
+						if ( mTY.length > n ) mTY = mTY.substr(0, n);
+						
+						var matrix: String = mA + "|" +mB + "|" + mC + "|" +mD + "|" + mTX + "|" + mTY;
+						var idem: Bool = false;
+						
+						if ( c > 1 )
+						{
+						
+							var lastMatrix: Matrix =  matrixStocker.get( (c - 1) + "-" + frameConfig.textureData.id);
+						
+							if ( lastMatrix != null ) idem = ( m.a == lastMatrix.a &&  m.b == lastMatrix.b &&  m.c == lastMatrix.c &&  m.d == lastMatrix.d && m.tx == lastMatrix.tx && m.ty == lastMatrix.ty );
+						}
+					
+						
+						if ( idem )
+						{
+							if ( frameConfig.alpha == 1) xml += "<bmp id='" + frameConfig.textureData.id + "'/>";
+							else xml += "<bmp id='" + frameConfig.textureData.id + "' a='" + frameConfig.alpha + "'/>";
+							
+						}
+						else
+						{
+							if ( frameConfig.alpha == 1) xml += "<bmp id='" + frameConfig.textureData.id + "' m='" + matrix + "'/>";
+							else xml += "<bmp id='" + frameConfig.textureData.id + "' m='" + matrix + "' a='" + frameConfig.alpha + "'/>";
+						}
+						
+						matrixStocker.set( c + "-" + frameConfig.textureData.id, m);
+						
 					}
 					
 				}
@@ -305,6 +349,8 @@ class AtlasGenerator extends Sprite
 			}
 			xml += "</anim>";	
 		}
+		
+		matrixStocker = null;
 			
 		return xml;
 	}

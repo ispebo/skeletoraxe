@@ -1,6 +1,7 @@
 package skeletoraxe.converter;
 
 import flash.display.Bitmap;
+import flash.utils.CompressionAlgorithm;
 
 import flash.display.Sprite;
 import flash.events.Event;
@@ -355,6 +356,16 @@ class ToolsInterface extends Sprite
 		LoaderApp.instance.visible = true;
 		
 		var zipExporter: ZipExporter = new ZipExporter();
+		
+		//Version Binaire
+		/*var byte2:ByteArray = new ByteArray();
+		var stringOut: String = _atlasconverter.createXml( modeAtlas );
+		byte2.writeUTFBytes(stringOut); // xmlData is original XML string
+		byte2.compress();
+	*/
+		
+	
+		//Version XML
 		var byte2: ByteArray = new XmlExporter( ).generateByteArray( _atlasconverter.createXml( modeAtlas ) );
 		
 		if ( modeAtlas )

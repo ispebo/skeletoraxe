@@ -23,7 +23,6 @@
   <build>
     <option directives="" />
     <option flashStrict="False" />
-    <option noInlineOnDebug="False" />
     <option mainClass="GameMain" />
     <option enabledebug="True" />
     <option additional="-swf-version 11.6&#xA;-debug " />
@@ -33,6 +32,7 @@
     <library name="openfl" />
     <library name="openfl-compatibility" />
     <library name="skeletoraxe" />
+    <library name="openfl-share" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>

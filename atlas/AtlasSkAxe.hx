@@ -40,6 +40,7 @@ class AtlasSkAxe
 	private var _atlasConfig				: Array<AtlasConfig>;
 	
 	
+	
 	public function new( ident: Int ) : Void 
 	{
 		_id = ident;
@@ -78,6 +79,13 @@ class AtlasSkAxe
 		_atlasBMP = null;
 	}
 	//---------------------------------------------------------------------------
+	public function replaceTexture( newBmpData: BitmapData, idTexture: Int ) : Void
+	{
+		if ( !_textures.exists( idTexture ) ) throw("Texture with id: " + idTexture + " not exist");
+	
+		_textures.set( idTexture, newBmpData );
+	}
+	//---------------------------------------------------------------------------
 	public var id (get_id, null ) : Int;
 	private function get_id( ): Int { return _id; };
 	
@@ -110,6 +118,7 @@ class AtlasSkAxe
 			texture.dispose();
 			
 		}
+	
 		_textures = null;
 		_atlasConfig = null;
 	}

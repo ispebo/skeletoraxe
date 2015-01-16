@@ -52,8 +52,12 @@ class ZipExporter
 			for ( i in 0 ... _bytePNG.length )
 				_zip.addFile( nameFile+"__"+(i+1)+".png", _bytePNG[i] );
 		}
-		else _zip.addFile( nameFile+".png", _bytePNG[0]);
+		else _zip.addFile( nameFile + ".png", _bytePNG[0]);
+		
+		
 		_zip.addFile( nameFile+".xml", _byteXml );
+		_byteXml.compress();
+		_zip.addFile( nameFile+".ipb", _byteXml );
 		_zip.serialize( stream );
 		
 		stream.close();

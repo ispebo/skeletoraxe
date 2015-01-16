@@ -3,6 +3,8 @@
 import flash.display.Stage;
 import flash.events.KeyboardEvent;
 import flash.events.Event;
+import flash.filters.GlowFilter;
+import flash.system.System;
 import tools.FPSCounter;
 
 import skeletoraxe.engine.Engine;
@@ -10,6 +12,7 @@ import skeletoraxe.atlas.AtlasStorageSkAxe;
 import skeletoraxe.atlas.MovieClip;
 
 import flash.Lib;
+
 
 #if (!android && !html5 )
 import com.standard.log.alcon.Debug;
@@ -98,6 +101,7 @@ class Main extends Engine
 	{
 		if ( MODE_LOADING == MODE_ATLAS ) addSkeletalAtlas("xmls/CrocoAtlas.xml", "gfx/CrocoAtlas.png");
 		else addSkeletalPNGs("xmls/CrocoPNGS.xml", "gfx/CrocoPNGS.png");
+		
 	}
 	
 	//---------------------------------------------------------------------
@@ -115,10 +119,11 @@ class Main extends Engine
 			
 										
 			
-		for ( i in 0 ... 5 ) 
-			for ( j in 0 ... 3 )
-			 createAnim(  i * 180 + 100, j * 280 + 100 );
-			 
+		for ( i in 0 ... 13 ) 
+			for ( j in 0 ... 7 )
+			 createAnim(  i * 70 + 50, j * 105 + 50 );
+			
+			 createAnim( 250, 250);
 	
 		start();
 		var fpsCounter: FPSCounter = new FPSCounter();
@@ -138,6 +143,10 @@ class Main extends Engine
 		movie.x = _x;
 		movie.y = _y;
 		displayMovie( movie  );
+		
+		
+		//movie.filters = [new GlowFilter(0x8E33FF33, 1, 18, 18, 7.43, 1, false, false)];
+		movie.scaleX = movie.scaleY = 0.4;
 		movie.addFrameScript( movie.totalFrames - 1, function() 
 													{ 
 														if ( Std.random(5) == 1 ) 
@@ -145,6 +154,7 @@ class Main extends Engine
 															movie.addFrameScript( movie.totalFrames - 1, null);
 															movie.removeFlag = true;
 														}
+												
 													} );
 	}
 	
@@ -154,15 +164,20 @@ class Main extends Engine
 	{
 		var i : Int = 0;
 	
-		
+		//if ( Std.random(10 ) == 0 )
+		//{
+			//trace("++++++++++ "+_enableMovies.length);
+			//System.gc();
+		//}
 		while ( i < _enableMovies.length )
 		{
 			var movie: MovieClip = _enableMovies[i];
-			if ( movie.removeFlag )
+			if ( movie.removeFlag /*|| Std.random(2) == 0*/)
 			{
 				removeChild( movie );
 				unDisplayMovie( movie  );
 				createAnim( movie.x, movie.y);
+				movie = null;
 			}
 			else 
 			{

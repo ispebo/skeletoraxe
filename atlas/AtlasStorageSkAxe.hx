@@ -8,6 +8,7 @@ import flash.events.Event;
 import flash.geom.Matrix;
 import flash.Lib;
 import flash.net.URLLoader;
+import haxe.Timer;
 import skeletoraxe.atlas.AtlasSkAxe;
 
 
@@ -26,15 +27,22 @@ class AtlasStorageSkAxe
 	public static  var BUFFER					: Int = 0; //Max de movieclips dans la pool
 	public static  var SAMES_ENTITIES_MAX		: Int = 0; 
 	
+	
+	
 	private var _pool							: Map<String,Array<MovieClip>>;
 	private var _toLoad							: Int;
+	
+	
 	
 	public function new( cb:   Void->Void ) : Void
 	{
 		_cb = cb;
+		
 		_originalMovieClipsAtlas = new Map();	
 		_pool = new Map();
+		
 		_toLoad = 0;
+	
 	}
 	
 	//-------------------------------------------------------------------
@@ -86,7 +94,8 @@ class AtlasStorageSkAxe
 			}
 		}
 		
-		if( destroyMovie )  movie.destroy();
+		if ( destroyMovie )  movie.destroy();
+		
 	}
 	//-------------------------------------------------------------------
 	private function getFromPool( id: String ) : MovieClip
@@ -182,6 +191,8 @@ class AtlasStorageSkAxe
 			_toLoad++;
 			var ipbAtlas: AtlasSkAxe = null;
 			
+			var matrixStocker: Map<String, Matrix> = new Map();
+			
 			for (node in _xml.elements() ) 
 			{
 				
@@ -237,26 +248,48 @@ class AtlasStorageSkAxe
 									id: Std.parseInt( gC.get("id") )
 								}
 								
+							
+								
 								//Matrix
-								var mat: Array<String> = gC.get("mat").split("|");
-								var newMatrix: Matrix = new Matrix();
-								newMatrix.a = Std.parseFloat( mat[0] );
-								newMatrix.b = Std.parseFloat( mat[1] );
-								newMatrix.c = Std.parseFloat( mat[2] );
-								newMatrix.d = Std.parseFloat( mat[3] );
-								newMatrix.tx = Std.parseFloat( mat[4] );
-								newMatrix.ty = Std.parseFloat( mat[5] );
-								mat = null;
+								var newMatrix: Matrix = null;
+								if ( gC.get("m") != null )
+								{
+									var mat: Array<String> = gC.get("m").split("|");
+									newMatrix = new Matrix();
+									
+									var n: Int = 6;
+									if ( mat[0].length > n ) mat[0] = mat[0].substr(0, n);
+									if ( mat[1].length > n ) mat[1] = mat[1].substr(0, n);
+									if ( mat[2].length > n ) mat[2] = mat[2].substr(0, n);
+									if ( mat[3].length > n ) mat[3] = mat[3].substr(0, n);
+									if ( mat[4].length > n ) mat[4] = mat[4].substr(0, n);
+									if ( mat[5].length > n ) mat[5] = mat[5].substr(0, n);
+									
+									newMatrix.a = Std.parseFloat( mat[0] );
+									newMatrix.b = Std.parseFloat( mat[1] );
+									newMatrix.c = Std.parseFloat( mat[2] );
+									newMatrix.d = Std.parseFloat( mat[3] );
+									newMatrix.tx = Std.parseFloat( mat[4] );
+									newMatrix.ty = Std.parseFloat( mat[5] );
+									
+									
+									mat = null;
+								}
+								else
+								{
+									newMatrix =  matrixStocker.get( (Std.parseInt( child.get("id") ) - 1) + "-" + texturData.id);
+								}
 								
-								
+								var alph: Float = 1;
+								if ( gC.get("a") != null ) alph = Std.parseFloat( gC.get("a") );
 								var frameConfig:  TextureFrameConfig = {
 									textureData: texturData,
 									matrix	: newMatrix,
 									frame: Std.parseInt( child.get("id") ), 
-									alpha:  Std.parseFloat( gC.get("alph") )
+									alpha:  alph
 								
 								}
-							
+								matrixStocker.set( frameConfig.frame + "-" + texturData.id, newMatrix);
 							
 								tab.push( frameConfig );
 							}
@@ -265,13 +298,22 @@ class AtlasStorageSkAxe
 				}
 				
 			}
+			matrixStocker = null;
 			_xml = null;
 			
 			_toLoad--;
-			if ( _toLoad == 0 ) _cb(  );
+			if ( _toLoad == 0 )
+			{
+				_cb(  );
+				
+			
+				
+				
+			}
 			
 		}
 	}
+
 	
 	//-------------------------------------------------------------
 	

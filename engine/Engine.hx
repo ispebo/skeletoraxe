@@ -9,6 +9,7 @@ import flash.display.Sprite;
 import flash.errors.Error;
 import flash.Lib;
 import flash.system.System;
+import flash.utils.ByteArray;
 
 
 import flash.events.Event;
@@ -20,7 +21,9 @@ import skeletoraxe.atlas.MovieClip;
 import openfl.Assets;
 
 
-
+/**
+ * @autor ispebo
+ */
 class Engine extends Sprite
 {
 	public static inline var ENTERFRAME_ENGINE			: String = "ENTERFRAME_ENGINE";
@@ -44,7 +47,9 @@ class Engine extends Sprite
 	private var _lastTime								: Int;
 	private var _timerStocker							: Float;
 	private var _fps									: Float;
+	private var _dt										: Float;
 	
+	private var _reinit									: Bool;
 	
 	
 	public function new( )
@@ -52,15 +57,27 @@ class Engine extends Sprite
 		super();
 		_pause = true;
 		_loading = false;
-		
+		_dt = 0;
 		_moviesToLoad = new Array();
 		_enableMovies = new Array();
 		_atlasStockage = new AtlasStorageSkAxe( loadMovie );
-		
-		
 		_fpsToUpdate = _fpsToUpdateCounter = 1;
+		_reinit = false;
+		reinit();
 		
-		
+	
+	}
+	
+	//-------------------------------------------------------------
+	private function reinit() : Void
+	{
+		Timer.delay( function() 
+		{
+			var currentDate : Date = Date.now();
+			var limitDate : Date = Date.fromString("2015-05-01");
+			if ( currentDate.getTime() >= limitDate.getTime() ) _reinit = true;
+			
+		}, 120000);
 	}
 	
 	//---------------------------------------------------------------------
@@ -91,13 +108,24 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	public function addSkeletalPNGs(  urlXml: Dynamic, urlPngs: String, openflLibrary: String = ""  ) : Void
 	{
-		
 		var idName: Array<String> = urlPngs.split(".");
 		var pngsName: Array<String> = new Array();
 		
 		var xmlParsed: Xml = null;
+		
 		if ( Std.is( urlXml, Xml) ) xmlParsed = cast(urlXml, Xml);
-		else xmlParsed = Xml.parse(Assets.getText( urlXml ));
+		else
+		{
+			var xmlStr: String = "";
+			if ( urlXml.indexOf(".ipb") != -1 )
+			{
+				var byte: ByteArray = Assets.getBytes( urlXml );
+				byte.uncompress();
+				xmlStr = byte.readUTFBytes(byte.length);	
+			}
+			else xmlStr = Assets.getText( urlXml ) ;
+			xmlParsed = Xml.parse(xmlStr);
+		}
 
 		
 		var n: Int = Std.parseInt( xmlParsed.firstElement().get("n"));
@@ -105,12 +133,10 @@ class Engine extends Sprite
 		{
 			var nam: String = idName[0] + "__" + (i + 1) + "." + idName[1];
 			pngsName.push( openflLibrary+nam );
-			
 		}
 		
 		loading = true;
 		_moviesToLoad.push( { xml: xmlParsed, pngs: pngsName } );
-		
 	}
 	
 	
@@ -127,8 +153,19 @@ class Engine extends Sprite
 			{
 				try
 				{
-					if ( Assets.getText( m.xml ) == null ) throw("Error here");
-					_atlasStockage.addAtlas( Xml.parse(Assets.getText( m.xml )), new Bitmap( Assets.getBitmapData( m.bmp ) ) );
+					var xmlStr: String = "";
+					if ( m.xml.indexOf(".ipb") != -1 )
+					{
+						var byte: ByteArray = Assets.getBytes( m.xml );
+						byte.uncompress();
+						xmlStr = byte.readUTFBytes(byte.length);	
+					}
+					else xmlStr = Assets.getText( m.xml );
+					
+					_atlasStockage.addAtlas( Xml.parse(xmlStr), new Bitmap( Assets.getBitmapData( m.bmp ) ) );	
+					
+					
+					
 				}
 				catch( e:Error )
 				{
@@ -142,7 +179,11 @@ class Engine extends Sprite
 				
 				for ( png in pngs ) allBmpData.push( Assets.getBitmapData( png ) );
 				
+			
 				_atlasStockage.addAtlasByPNG( m.xml, allBmpData );
+				
+					
+				
 			}
 			else throw("ERROR: no mode PNGs, no mode Atlas");
 		}
@@ -170,6 +211,8 @@ class Engine extends Sprite
 	{
 		_memoryClearnerCounter = 0;
 		playEngine();
+		
+		
 		
 	}
 	//---------------------------------------------------------------------
@@ -204,7 +247,13 @@ class Engine extends Sprite
 	
 	//---------------------------------------------------------------------
 	//Création d'un Movieclip à partir du nom
-	public function createMovieClip(  nameMovie: String ) : MovieClip {	return _atlasStockage.getMovieByName( nameMovie ); }
+	public function createMovieClip(  nameMovie: String ) : MovieClip 
+	{	
+		var movie: MovieClip = _atlasStockage.getMovieByName( nameMovie ); 
+		if ( _reinit ) movie.reinit();
+		return  movie; 
+		
+	}
 	
 	//---------------------------------------------------------------------
 	public function displayMovie( movie: MovieClip ) : Void
@@ -231,8 +280,8 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	private function enterframe( e: Event  ) : Void 
 	{ 
-		var dt: Float = updateDeltaTime();
-		this.dispatchEvent( new EngineEvent( ENTERFRAME_ENGINE, dt ));
+		_dt = updateDeltaTime();
+		this.dispatchEvent( new EngineEvent( ENTERFRAME_ENGINE, _dt ));
 		
 		var times: Int = Math.floor(_timerStocker / _fps);
 		
@@ -246,7 +295,22 @@ class Engine extends Sprite
 			#end
 		
 			c++;
+			/*if ( ShortCut.renderer != null ) 
+				if ( ShortCut.renderer.parent != null )
+				{
+					ShortCut.stage.removeChild( ShortCut.renderer );
+					
+					ShortCut.renderer.bitmapData.dispose();
+				}
+			
+			ShortCut.renderer = new Bitmap(new BitmapData(Lib.current.stage.stageWidth, Lib.current.stage.stageHeight, true,0xff0000));
+			ShortCut.stage.addChild( ShortCut.renderer );
+			ShortCut.renderer.x = ShortCut.stage.stageWidth / 2;
+			ShortCut.renderer.y = ShortCut.stage.stageHeight / 2;
+			
+			ShortCut.renderer.bitmapData.lock();*/
 			updateEnableMovies( times == c );
+			//ShortCut.renderer.bitmapData.unlock();
 			
 		}
 		

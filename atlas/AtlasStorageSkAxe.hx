@@ -38,6 +38,7 @@ class AtlasStorageSkAxe
 	{
 		_cb = cb;
 		
+	
 		_originalMovieClipsAtlas = new Map();	
 		_pool = new Map();
 		
@@ -48,17 +49,52 @@ class AtlasStorageSkAxe
 	//-------------------------------------------------------------------
 	public function getMovieByName( id: String ) : MovieClip 
 	{	
+		
 		var movie: MovieClip = getFromPool( id );
 		if ( movie == null )
 		{
+		
 			var originMovie: MovieClip = _originalMovieClipsAtlas.get(id); 
-			if ( originMovie == null ) throw(" error  "+id);
-			movie = new MovieClip( id, originMovie.ipbAtlas, originMovie.framesConfig );
+		
+			
+			if ( originMovie == null ) throw(" error qaui  " + id);
+			
+			if ( originMovie.ipbAtlas == null ) throw(" error ipbAtlas " + id);
+		
+			if ( originMovie.framesConfig == null ) throw(" error framesConfig "+id);
+			movie = new MovieClip( id, originMovie.ipbAtlas, originMovie.framesConfig, originMovie.group );
+			
 			if ( movie == null ) throw("nulo: " + id);
+			
 		
 		}
 		
 		return movie;
+	}
+	//-------------------------------------------------------------------
+	public function existMovie( id: String ) : Bool
+	{
+		return _originalMovieClipsAtlas.exists( id );
+	}
+	//-------------------------------------------------------------------
+	public function destroyByGroup( group : String ) : Void
+	{
+	
+		var c: Int = 0;
+		var movies: Array<MovieClip> = new Array();
+		var i : Iterator<String> = _originalMovieClipsAtlas.keys();		
+		while( i.hasNext() )
+		{
+			var idMovie: String = i.next();
+			var movie: MovieClip = _originalMovieClipsAtlas.get( idMovie );
+			if ( movie.group == group ) 
+			{
+				_originalMovieClipsAtlas.remove( idMovie );
+				movie.destroy( true );
+				c++;
+			}
+		}
+		trace("destroyByGroup: " +c+"-->"+_pngs);
 	}
 	//-------------------------------------------------------------------
 	//On vient de supprimer un IPBAtlasMovieclip de la scène
@@ -89,6 +125,7 @@ class AtlasStorageSkAxe
 			{
 				if ( obj == null ) obj = [movie];
 				else obj.push( movie );
+				//trace("##>setIn POOL >"+id,"error");
 				_pool.set( id, obj );
 				movie.reset();
 			}
@@ -105,6 +142,7 @@ class AtlasStorageSkAxe
 		if ( obj != null ) 
 		{
 			movie = obj[0];
+			//if ( movie != null ) trace("################# FROM POOL >"+id+"->"+movie,"warning");
 			obj.splice(0, 1);
 		}
 
@@ -168,23 +206,24 @@ class AtlasStorageSkAxe
 	}
 	//-------------------------------------------------------------------
 	//Possibilité de lui donner directement les données nécessaires
-	public function addAtlas( xml: Xml, bmp: Bitmap ) 
+	public function addAtlas( xml: Xml, bmp: Bitmap, group: String = "" ) 
 	{
 		_xml = xml;
 		_bitmap = bmp;
-		parse();
+		
+		parse( group );
 	}
 	
 	//Possibilité de lui donner directement les données nécessaires
-	public function addAtlasByPNG( xml: Xml, pngs: Array<BitmapData> ) 
+	public function addAtlasByPNG( xml: Xml, pngs: Array<BitmapData>, group: String = "" ) 
 	{
 		_xml = xml;
 		_pngs = pngs;
-		
-		parse();
+	
+		parse( group );
 	}
 	//-------------------------------------------------------------------
-	private function parse() : Void
+	private function parse( group: String = "" ) : Void
 	{		
 		if ( _xml != null && (_bitmap != null || _pngs != null ) ) 
 		{
@@ -294,7 +333,7 @@ class AtlasStorageSkAxe
 								tab.push( frameConfig );
 							}
 						}
-						_originalMovieClipsAtlas.set( node.get("id"), new MovieClip(  node.get("id"), ipbAtlas, framesConfiguration) );
+						_originalMovieClipsAtlas.set( node.get("id"), new MovieClip(  node.get("id"), ipbAtlas, framesConfiguration, group) );
 				}
 				
 			}
@@ -304,6 +343,7 @@ class AtlasStorageSkAxe
 			_toLoad--;
 			if ( _toLoad == 0 )
 			{
+				//Timer.delay( _cb, 200);
 				_cb(  );
 				
 			
@@ -328,6 +368,8 @@ class AtlasStorageSkAxe
 			movie.destroy(  );
 		}
 	
+	
+		_pngs = null;
 		if ( _bitmap != null ) _bitmap.bitmapData.dispose();
 		_bitmap = null;
 		_originalMovieClipsAtlas = null;

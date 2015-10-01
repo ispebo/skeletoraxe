@@ -16,15 +16,16 @@ import flash.system.System;
 import flash.Vector.Vector;
 import haxe.Timer;
 import skeletoraxe.atlas.AtlasSkAxe;
+import skeletoraxe.engine.Engine;
 
 /**
  * @autor ispebo
  */
 class MovieClip extends Sprite
 {
-	//public static var ID								: Int = 0;
-	//public var myID										: Int;
 	
+
+	private var _group									: String;
 	private var _id										: String;	//Normalement c'est le nom de la classe
 	
 	private var _ipbAtlas								: AtlasSkAxe;
@@ -61,24 +62,25 @@ class MovieClip extends Sprite
 	private var _p1										: Array<Float>;
 	private var _p2										: Array<Float>;
 	private var _p3										: Array<Float>;
-	
-	
-	public function new( ident:String, ipbAtlas: AtlasSkAxe, framesConf: Array<Array<TextureFrameConfig>> ) : Void
+	private var _destroyed								: Bool;
+
+	public function new( ident:String, ipbAtlas: AtlasSkAxe, framesConf: Array<Array<TextureFrameConfig>>, gr: String = "" ) : Void
 	{
 		super();
 		
 		//ID++;
 		//myID = ID;
 	
+		_destroyed = false;
 		_id = ident;
-		
+		_group = gr;
 		_ipbAtlas = ipbAtlas;
 		_framesConfig = framesConf;
 		_texturesCreated = new Map();
 		cacheAsBitmap = false;
 		smoothing = false;
 		_width = _height = 0;
-		
+		if ( _framesConfig == null ) throw("######## FRAME CONFIG IS NULL IN CONSTRUCTOR =>"+ident );
 		reset();
 		
 	
@@ -86,14 +88,18 @@ class MovieClip extends Sprite
 		for ( frameConfig in _framesConfig )
 			for ( frame in frameConfig )
 			{
+					if ( frame.textureData == null ) throw( "frame.textureData is null: " + _id);
 				var texture: BitmapData = ipbAtlas.getTextureById(frame.textureData.id);
+				if ( texture == null ) throw( "texture is null: " + _id);
 				if ( texture.width > _width ) _width = Std.int ( texture.width );
 				if ( texture.height > _height ) _height = Std.int ( texture.height );
 			}
-			
+		
+		
 	}
-	
-	
+	//---------------------------------------------------------------------------
+	public var group( get_group, null ) : String;
+	private function get_group( ) : String { return _group; }
 	//---------------------------------------------------------------------------
 	public var framesConfig (get_framesConfig, null ) : Array<Array<TextureFrameConfig>> ;
 	private function get_framesConfig( ):  Array<Array<TextureFrameConfig>> {return _framesConfig;}
@@ -185,8 +191,11 @@ class MovieClip extends Sprite
 	{
 		var total: Int = 1;
 
-		if ( _framesConfig != null ) total = _framesConfig.length;
-		if ( total == 0 ) total = 1;
+		if (  !_destroyed )
+		{
+			if ( _framesConfig != null ) total = _framesConfig.length;
+			if ( total == 0 ) total = 1;
+		}
 		return total;
 	}
 
@@ -196,7 +205,7 @@ class MovieClip extends Sprite
 	
 	public function update( display: Bool = true  ) : Void
 	{
-		if ( _isPlaying )
+		if ( _isPlaying && !_destroyed)
 		{
 			if ( reversingMode ) 
 			{
@@ -214,6 +223,7 @@ class MovieClip extends Sprite
 			//On execute le script de la frame en cours
 			if ( currentScript != null ) currentScript();
 		}
+		//else trace("NO PLAYING=========>" + _id);
 		
 	}
 	
@@ -238,8 +248,8 @@ class MovieClip extends Sprite
 		#if html5
 			applyMethodOne();
 		#else
-			//applyMethodOne();
-			applyMethodTwo();
+			applyMethodOne();
+			//applyMethodTwo();
 		#end
 		
 		
@@ -248,6 +258,7 @@ class MovieClip extends Sprite
 	//-- METHODE 1 --
 	private function applyMethodOne() : Void
 	{
+	
 		_oldAttached = [];
 		for ( j in 0 ... this.numChildren ) 
 		{
@@ -261,12 +272,12 @@ class MovieClip extends Sprite
 		var matrix2: Matrix = null;
 		var newIDTexture: Int  = 0;
 		var counter: Map<Int,Int> = new Map();
-	
+		var c: Int = 0;
 		if ( currentFrame <  framesConfig.length )
 			for (  obj in _framesConfig[_currentFrame] )
 			{
 				idTexture=  obj.textureData.id ;
-				var c: Int = 0;
+				c = 0;
 				if ( counter.exists( idTexture ) ) c = counter.get(idTexture);	
 			
 				newIDTexture = idTexture + c;
@@ -306,12 +317,22 @@ class MovieClip extends Sprite
 			
 		
 		//On enleve ceux qui n'ont pas été attaché
-		while ( _oldAttached.length > 0 )
-		{
-			this.removeChild( _oldAttached[0] );
-			_oldAttached.splice(0, 1);
-		}
+		removeOldAttached();
 	
+	}
+	//---------------------------------------------------------------
+	private function removeOldAttached() : Void
+	{
+		if ( _oldAttached != null )
+		{
+			while ( _oldAttached.length > 0 )
+			{
+				this.removeChild( _oldAttached[0] );
+				_oldAttached.splice(0, 1);
+			}
+			_oldAttached = null;
+		}
+		
 	}
 	
 	//---------------------------------------------------------------
@@ -332,21 +353,40 @@ class MovieClip extends Sprite
 			   if ( bmpData != null )
 			   {
 				   //bmpData.lock();
-					
-				/*
+				
 					if ( obj.alpha < 1 )
 					{
 						textureMap = new BitmapData(bmpData.width, bmpData.height);
 						_alphaMaps.push( textureMap );
+						#if flash
 						var _alphaStr: String = "0x" + StringTools.hex( Std.int(obj.alpha * 255), 2) + "000000";
 						alphaMap = new BitmapData(bmpData.width,bmpData.height,true, untyped _alphaStr);
 						textureMap.copyPixels(bmpData, bmpData.rect, new Point(), alphaMap);	
 						alphaMap.dispose();
 						alphaMap = null;
 						bmpData = textureMap;
+						#else
+						textureMap.copyPixels(bmpData, bmpData.rect, new Point());
+						#end
+						
+					}
+					
+				/*
+					
+					if ( obj.alpha < 1 )
+					{
+						//textureMap = new BitmapData(bmpData.width, bmpData.height);
+						
+						//var _alphaStr: String = "0x" + StringTools.hex( Std.int(obj.alpha * 255), 2) + "000000";
+						textureMap = new BitmapData(bmpData.width, bmpData.height, false, 0xffffff);// , true, untyped _alphaStr);
+						_alphaMaps.push( textureMap );
+						textureMap.copyPixels(bmpData, bmpData.rect, new Point(), textureMap);	
+						//alphaMap.dispose();
+						//alphaMap = null;
+						bmpData = textureMap;
+						
 					}
 					*/
-					
 					if ( obj.matrix == null )
 					{
 						this.graphics.beginBitmapFill(bmpData, null, false, true);
@@ -378,21 +418,24 @@ class MovieClip extends Sprite
 					_p0 = _p1 = _p2 = _p3 = null;
 					
 			   }
-			  
+			 
 		   }
-
+		
 		this.graphics.endFill();
 	}
 	//---------------------------------------------------------------
-	private function removeAlphaMaps() : Void
+	public function removeAlphaMaps() : Void
 	{
 		if ( _alphaMaps != null)
 			while ( _alphaMaps.length > 0 )
 			{
+				
 				_alphaMaps[0].dispose();
 				_alphaMaps.splice(0, 1);
+				
 			}
 		
+	
 	}
 	
 	//---------------------------------------------------------------
@@ -400,12 +443,15 @@ class MovieClip extends Sprite
 	//---------------------------------------------------------------
 	public function gotoAndStop( frameToGo: Int, playAnimation: Bool = false, display: Bool = true ) : Void
 	{
-		if ( _framesConfig == null ) throw("_framesConfig is null =>id: "+_id);
-		if ( _framesConfig.length >= frameToGo ) _currentFrame = frameToGo;
-		else _currentFrame = _framesConfig.length;
-	
-		playing = playAnimation;
-		if ( display ) displayBitmap();
+		if ( !_destroyed )
+		{
+			if ( _framesConfig == null ) throw("#### _framesConfig is null =>id: "+_id+"--->"+_destroyed);
+			if ( _framesConfig.length >= frameToGo ) _currentFrame = frameToGo;
+			else _currentFrame = _framesConfig.length;
+		
+			playing = playAnimation;
+			if ( display ) displayBitmap();
+		}
 		
 	}
 	//---------------------------------------------------------------
@@ -417,11 +463,14 @@ class MovieClip extends Sprite
 	{
 		var ok : Bool = false;
 	
-		if ( _currentFrame < _framesConfig.length-1 )
+		if (  !_destroyed )
 		{
-			_currentFrame++;
-			if ( display ) displayBitmap();
-			ok = true;
+			if ( _currentFrame < _framesConfig.length-1 )
+			{
+				_currentFrame++;
+				if ( display ) displayBitmap();
+				ok = true;
+			}
 		}
 		return ok;
 	}
@@ -430,27 +479,66 @@ class MovieClip extends Sprite
 	public function prevFrame( display: Bool = true ) : Bool 
 	{
 		var ok : Bool = false;
-		if ( _currentFrame > 2 )
+		if (  !_destroyed )
 		{
-			_currentFrame--;
-			if ( display ) displayBitmap();
-			ok = true;
+			if ( _currentFrame > 2 )
+			{
+				_currentFrame--;
+				if ( display ) displayBitmap();
+				ok = true;
+			}
 		}
 		return ok;
 	}
 	//---------------------------------------------------------------
-	public function destroy( ) : Void
+	public function destroy( completely: Bool = false  ) : Void
 	{
+		_group = null;
 		
+		_id = null;
+		_destroyed = true;
 		removeAlphaMaps();
 		_alphaMaps = null;
-		this.graphics.clear();
-		
+	
 		playing = false;
 		_texturesCreated = null;
+		if ( completely ) if ( _ipbAtlas != null )  _ipbAtlas.destroy();
 		_ipbAtlas = null;
 		_framesScript = null;
-		_framesConfig = null;
+		
+		if ( _framesConfig != null )
+		{
+			if( completely )
+				for ( f in  _framesConfig )
+				{
+					if ( f != null ) 
+						for (  t in f )
+							if ( t != null )
+							{
+								
+								if ( t.matrix != null ) t.matrix = null;
+								if ( t.textureData != null )
+								{
+									
+									t.textureData.bmpData = null;
+								}
+								
+							}
+				}
+			_framesConfig = null;
+		
+		}
+		
+		_p0 = null;
+		_p1 = null;
+		_p2 = null;
+		_p3 = null;
+		
+		removeOldAttached();
+		this.graphics.clear();
+		while ( this.numChildren > 0 ) this.removeChildAt(0);
+	
+	
 		
 	}
 }

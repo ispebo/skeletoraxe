@@ -5,8 +5,8 @@ import flash.events.KeyboardEvent;
 import flash.events.Event;
 import flash.filters.GlowFilter;
 import flash.system.System;
-import tools.FPSCounter;
 
+import openfl.display.FPS;
 import skeletoraxe.engine.Engine;
 import skeletoraxe.atlas.AtlasStorageSkAxe;
 import skeletoraxe.atlas.MovieClip;
@@ -119,17 +119,15 @@ class Main extends Engine
 			
 										
 			
-		for ( i in 0 ... 13 ) 
-			for ( j in 0 ... 7 )
-			 createAnim(  i * 70 + 50, j * 105 + 50 );
+		for ( i in 0 ... 8 ) 
+			for ( j in 0 ... 5 )
+			 createAnim(  i * 120 + 50, j * 180 + 50 );
 			
-			 createAnim( 250, 250);
+			
 	
 		start();
-		var fpsCounter: FPSCounter = new FPSCounter();
-		addChild( fpsCounter );
-		fpsCounter.draw();
-		fpsCounter.start();
+	var fps: FPS = new FPS(10,10,0xffffff);
+		addChild( fps );
 					
 	
 	}
@@ -146,7 +144,7 @@ class Main extends Engine
 		
 		
 		//movie.filters = [new GlowFilter(0x8E33FF33, 1, 18, 18, 7.43, 1, false, false)];
-		movie.scaleX = movie.scaleY = 0.4;
+		movie.scaleX = movie.scaleY = 0.8;
 		movie.addFrameScript( movie.totalFrames - 1, function() 
 													{ 
 														if ( Std.random(5) == 1 ) 
@@ -169,6 +167,7 @@ class Main extends Engine
 			//trace("++++++++++ "+_enableMovies.length);
 			//System.gc();
 		//}
+		
 		while ( i < _enableMovies.length )
 		{
 			var movie: MovieClip = _enableMovies[i];
@@ -181,7 +180,7 @@ class Main extends Engine
 			}
 			else 
 			{
-				
+				trace("==> " + _enableMovies.length);
 				movie.update();
 				i++;
 			}

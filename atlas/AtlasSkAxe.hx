@@ -6,6 +6,7 @@ import flash.geom.Rectangle;
 import flash.Lib;
 import flash.geom.Matrix;
 
+
 /**
  * @autor ispebo
  */
@@ -33,9 +34,11 @@ typedef AtlasConfig = {
 
 class AtlasSkAxe
 {
+
 	private var _id							: Int;
 	private var _atlasBMP					: BitmapData;
 	private var _textures					: Map<Int,BitmapData>;
+	private var _texturesNotOriginals		: Map<Int,BitmapData>;
 	
 	private var _atlasConfig				: Array<AtlasConfig>;
 	
@@ -43,6 +46,7 @@ class AtlasSkAxe
 	
 	public function new( ident: Int ) : Void 
 	{
+		
 		_id = ident;
 	
 	}
@@ -57,6 +61,7 @@ class AtlasSkAxe
 	//-----------------------------------------------------------
 	public function createByPNGs( pngs: Array<BitmapData> ) : Void
 	{
+		_texturesNotOriginals = new Map();
 		_textures = new Map();
 		for ( i in 0 ... pngs.length )
 			_textures.set( (i + 1), pngs[i] );
@@ -82,7 +87,11 @@ class AtlasSkAxe
 	public function replaceTexture( newBmpData: BitmapData, idTexture: Int ) : Void
 	{
 		if ( !_textures.exists( idTexture ) ) throw("Texture with id: " + idTexture + " not exist");
-	
+		var oldBmpData: BitmapData = _textures.get(idTexture);
+		if ( _texturesNotOriginals.exists( idTexture ) ) oldBmpData.dispose();
+		
+		oldBmpData = null;
+		_texturesNotOriginals.set( idTexture, newBmpData );
 		_textures.set( idTexture, newBmpData );
 	}
 	//---------------------------------------------------------------------------
@@ -111,15 +120,35 @@ class AtlasSkAxe
 	//---------------------------------------------------------------------------
 	public function destroy() : Void
 	{
-		var i : Iterator<Int> = _textures.keys();		
-		while( i.hasNext() )
-		{
-			var texture: BitmapData = _textures.get( i.next() );
-			texture.dispose();
-			
-		}
 	
-		_textures = null;
+		if ( _textures != null )
+		{
+			
+		/*	var i : Iterator<Int> = _textures.keys();		
+			while( i.hasNext() )
+			{
+				var texture: BitmapData = _textures.get( i.next() );
+				texture.dispose();
+				
+			}*/
+		
+			_textures = null;
+		}
+		
+		if ( _texturesNotOriginals != null )
+		{
+			var i : Iterator<Int> = _texturesNotOriginals.keys();		
+			while( i.hasNext() )
+			{
+				var texture: BitmapData = _texturesNotOriginals.get( i.next() );
+				texture.dispose();
+				
+			}
+		
+			_texturesNotOriginals = null;
+		}
+		
+		_atlasBMP = null;
 		_atlasConfig = null;
 	}
 	

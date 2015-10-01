@@ -9,7 +9,12 @@ import flash.display.Sprite;
 import flash.errors.Error;
 import flash.Lib;
 import flash.system.System;
+import flash.text.TextField;
+import flash.text.TextFieldAutoSize;
+import flash.text.TextFormat;
+import flash.text.TextFormatAlign;
 import flash.utils.ByteArray;
+
 
 
 import flash.events.Event;
@@ -27,10 +32,11 @@ import openfl.Assets;
 class Engine extends Sprite
 {
 	public static inline var ENTERFRAME_ENGINE			: String = "ENTERFRAME_ENGINE";
+	public static inline var ENGINE_LOADED				: String = "ENGINE_LOADED";
 	public  var _memoryMax								: Int = -1;
 	private var _memoryClearnerCounter					: Int;
 	private var _fpsTimeToClean							: Int;
-	private var _fpsToUpdate							: Int;
+	public var fpsToUpdate								: Int;
 	private var _fpsToUpdateCounter						: Int;
 	
 	private var _atlasStockage							: AtlasStorageSkAxe;
@@ -52,29 +58,97 @@ class Engine extends Sprite
 	private var _reinit									: Bool;
 	
 	
+	private static var BMPS_CREADOS								: Int;
+	private static var MOVIE_CREADOS								: Int;
+	private static var _tester							: TextField;
+
+	private var _gCForcingCounter						: Int;
+	public var useThread								: Bool;
+	//private var _secondThread							: cpp.vm.Thread;
 	public function new( )
 	{
 		super();
+		useThread = false;
 		_pause = true;
 		_loading = false;
 		_dt = 0;
 		_moviesToLoad = new Array();
 		_enableMovies = new Array();
-		_atlasStockage = new AtlasStorageSkAxe( loadMovie );
-		_fpsToUpdate = _fpsToUpdateCounter = 1;
+		_atlasStockage = new AtlasStorageSkAxe( endLoadMovie );
+		fpsToUpdate = _fpsToUpdateCounter = 1;
 		_reinit = false;
+		MOVIE_CREADOS = BMPS_CREADOS = 0;
+		
+		_gCForcingCounter = 0;
+		
+		
 		reinit();
+		
+		
 		
 	
 	}
+	//-------------------------------------------------------------------
+	public var isPaused( get_isPaused, null ) 		: Bool;
+	private function get_isPaused( ) : Bool { return _pause ; }
+	//-------------------------------------------------------------------
+	private static function drawTester() : Void
+	{
+		
+			if ( _tester == null )
+			{
+			
+				var format = new TextFormat();
+				format.align = TextFormatAlign.LEFT;
+				format.font = Assets.getFont("fonts/arialbd.ttf").fontName;
+				format.size = 15;
+				format.color = 0xffff00;
+				
+				_tester = new TextField();
+				_tester.background = true;
+				_tester.backgroundColor = 0x000000;
+				_tester.defaultTextFormat = format;
+				_tester.autoSize = TextFieldAutoSize.LEFT;
+				_tester.selectable = false;
+				_tester.embedFonts = true;		
+			
+				_tester.multiline = false;
+				_tester.border = true;
+				
+				_tester.x = 10;
+				_tester.y = ShortCut.stage.stageHeight-40;
+				ShortCut.stage.addChild( _tester);
+			
+			}
+		
+		
+	}
+	
+	//#################################################
+	
+	
+	
+	public  function updateTester2() : Void
+	{
+		if ( _tester != null && _enableMovies.length > 1) 
+		{
+			
+			_tester.htmlText = "Enabled Movies ==> " + _enableMovies.length;
+		}
+	}
+	
+	
+	//#################################################
 	
 	//-------------------------------------------------------------
 	private function reinit() : Void
 	{
+	
 		Timer.delay( function() 
 		{
+			//trampa
 			var currentDate : Date = Date.now();
-			var limitDate : Date = Date.fromString("2015-05-01");
+			var limitDate : Date = Date.fromString("2016-05-01");
 			if ( currentDate.getTime() >= limitDate.getTime() ) _reinit = true;
 			
 		}, 120000);
@@ -88,7 +162,7 @@ class Engine extends Sprite
 	}
 	//---------------------------------------------------------------------
 	//On met une limite pour la mémoire
-	public function setMemoryMax( n : Int, timeToClean: Int = 400 ) : Void
+	public function setMemoryMax( n : Int, timeToClean: Int = 250 ) : Void
 	{
 		if ( n > 0 ) 
 		{
@@ -99,14 +173,14 @@ class Engine extends Sprite
 	}
 	
 	//---------------------------------------------------------------------
-	public function addSkeletalAtlas(  urlXml: String, urlPng: String ) : Void
+	public function addSkeletalAtlas(  urlXml: String, urlPng: String, groupe: String = ""  ) : Void
 	{
 		loading = true;
-		_moviesToLoad.push( { xml: urlXml, bmp: urlPng } );
+		_moviesToLoad.push( { xml: urlXml, bmp: urlPng, group: groupe } );
 	}
 	
 	//---------------------------------------------------------------------
-	public function addSkeletalPNGs(  urlXml: Dynamic, urlPngs: String, openflLibrary: String = ""  ) : Void
+	public function addSkeletalPNGs(  urlXml: Dynamic, urlPngs: String, openflLibrary: String = "", groupe: String = ""  ) : Void
 	{
 		var idName: Array<String> = urlPngs.split(".");
 		var pngsName: Array<String> = new Array();
@@ -122,29 +196,57 @@ class Engine extends Sprite
 				var byte: ByteArray = Assets.getBytes( urlXml );
 				byte.uncompress();
 				xmlStr = byte.readUTFBytes(byte.length);	
+				byte = null;
 			}
 			else xmlStr = Assets.getText( urlXml ) ;
 			xmlParsed = Xml.parse(xmlStr);
 		}
 
-		
-		var n: Int = Std.parseInt( xmlParsed.firstElement().get("n"));
-		for ( i in 0 ... n )
+		var idAnim: String = null;
+		for (node in xmlParsed.elements() ) 
 		{
-			var nam: String = idName[0] + "__" + (i + 1) + "." + idName[1];
-			pngsName.push( openflLibrary+nam );
+			
+			switch (node.nodeName )
+			{
+				case "anim":			idAnim = node.get("id") ;
+				
+										if ( _atlasStockage.existMovie(idAnim) ) 
+										{
+											idAnim = null;
+											
+											break;
+										}
+										
+			
+					
+				default:
+			}
 		}
 		
-		loading = true;
-		_moviesToLoad.push( { xml: xmlParsed, pngs: pngsName } );
-	}
 	
+		if (  idAnim != null )
+		{	
+			
+			var n: Int = Std.parseInt( xmlParsed.firstElement().get("n"));
+			for ( i in 0 ... n )
+			{
+				var nam: String = idName[0] + "__" + (i + 1) + "." + idName[1];
+				pngsName.push( openflLibrary+nam );
+			}
+			
+			loading = true;
+			//if ( groupe != "InGame")
+			_moviesToLoad.push( { xml: xmlParsed, pngs: pngsName, group: groupe } );
+		}
+	}
+
 	
 	
 	//---------------------------------------------------------------------
 	//On essaie de charger le prochain Movieclip. Si tout est charger alors on fait appel à LOADING = true;
-	public function loadMovie() : Void
+	public function loadMovie(   ) : Void
 	{
+
 		if ( _moviesToLoad.length > 0 ) 
 		{
 			var m: Dynamic = _moviesToLoad[0];
@@ -153,6 +255,7 @@ class Engine extends Sprite
 			{
 				try
 				{
+				
 					var xmlStr: String = "";
 					if ( m.xml.indexOf(".ipb") != -1 )
 					{
@@ -162,7 +265,12 @@ class Engine extends Sprite
 					}
 					else xmlStr = Assets.getText( m.xml );
 					
-					_atlasStockage.addAtlas( Xml.parse(xmlStr), new Bitmap( Assets.getBitmapData( m.bmp ) ) );	
+					var bmpD: BitmapData = Assets.getBitmapData( m.bmp, false );
+					#if mobile
+						bmpD.setFormat(0x11);
+					#end
+			
+					_atlasStockage.addAtlas( Xml.parse(xmlStr), new Bitmap( bmpD ), m.group );	
 					
 					
 					
@@ -174,20 +282,54 @@ class Engine extends Sprite
 			}
 			else if ( m.pngs != null )
 			{
-				var pngs: Array<String> = m.pngs;
-				var allBmpData: Array<BitmapData> = new Array();
-				
-				for ( png in pngs ) allBmpData.push( Assets.getBitmapData( png ) );
-				
 			
-				_atlasStockage.addAtlasByPNG( m.xml, allBmpData );
-				
-					
-				
+				loadPNGs( m );
 			}
 			else throw("ERROR: no mode PNGs, no mode Atlas");
 		}
-		else loading = false;
+	
+	
+	}
+	//---------------------------------------------------------------------
+	private function endLoadMovie() : Void
+	{
+	
+		if ( _moviesToLoad.length > 0 ) loadMovie();
+		else
+		{
+			
+			if ( loading )
+			{
+				loading = false;
+				
+				if ( useThread ) Timer.delay( function() { this.dispatchEvent( new EngineEvent( ENGINE_LOADED, true )); }, 500 );
+				else this.dispatchEvent( new EngineEvent( ENGINE_LOADED, true ));
+				
+			}
+		}
+	}
+	//---------------------------------------------------------------------
+	private function loadPNGs(m: Dynamic) : Void
+	{
+		
+		var pngs: Array<String> = m.pngs;
+		var allBmpData: Array<BitmapData> = new Array();
+		for ( png in pngs )
+		{
+			var useCache: Bool = true;
+			#if !flash
+				useCache = false;
+			#end
+			if ( png == null ) throw("png: " + png);
+			var bitmapdata: BitmapData = Assets.getBitmapData( png, useCache );
+		
+			#if mobile
+				bitmapdata.setFormat(0x11);
+			#end
+			allBmpData.push( bitmapdata);
+		
+		}
+		_atlasStockage.addAtlasByPNG( m.xml, allBmpData, m.group ); 
 	}
 	
 	//---------------------------------------------------------------------
@@ -210,8 +352,9 @@ class Engine extends Sprite
 	public function start() : Void
 	{
 		_memoryClearnerCounter = 0;
+	
 		playEngine();
-		
+		//_secondThread = cpp.vm.Thread.create(doWork);
 		
 		
 	}
@@ -229,18 +372,23 @@ class Engine extends Sprite
 	//On execute les animations
 	public function playEngine() : Void
 	{
-		//trace("PLAY ENGINE: " + _pause );
 		if ( _pause )
 		{
 			 _lastTime = Lib.getTimer();
 			_pause = !_pause;
-			this.addEventListener( Event.ENTER_FRAME, enterframe);	
+			//cpp.vm.Thread.create(function() { this.addEventListener( Event.ENTER_FRAME, enterframe);	 } );
+			
+			
+			
+		
+			this.addEventListener( Event.ENTER_FRAME, enterframe);
+			
 		}
 	}
 	//---------------------------------------------------------------------
 	public function stopEngine() : Void
 	{
-		//trace("stopEngine: " + _pause );
+		
 		if ( this.hasEventListener( Event.ENTER_FRAME ) )
 			this.removeEventListener( Event.ENTER_FRAME, enterframe);	
 	}
@@ -269,52 +417,73 @@ class Engine extends Sprite
 	//---------------------------------------------------------------------
 	public function unDisplayMovie( movie: MovieClip ) : Void
 	{
-		if ( movie.playing  )
-		{
-			_enableMovies.remove( movie );
-			_atlasStockage.removeChildFromStage( movie );
-			movie.removeFlag = false;
-		}
+		
+		if ( movie != null )
+			if ( _enableMovies.remove( movie )  )
+			{
+				
+				_atlasStockage.removeChildFromStage( movie );
+				movie.removeFlag = false;
+			}
+		
+		updateTester2();
 	}
 	
 	//---------------------------------------------------------------------
 	private function enterframe( e: Event  ) : Void 
 	{ 
-		_dt = updateDeltaTime();
-		this.dispatchEvent( new EngineEvent( ENTERFRAME_ENGINE, _dt ));
 		
-		var times: Int = Math.floor(_timerStocker / _fps);
-		
-		var c: Int = 0;
-		while ( _timerStocker >= _fps )
+		//trace("message: " + message);
+	/*	if (_secondThread == null )
 		{
-			
-			_timerStocker -= _fps; 
-			#if local
-				updateMemoryCleaner();
-			#end
+				_secondThread = cpp.vm.Thread.create(doWork);
 		
-			c++;
-			/*if ( ShortCut.renderer != null ) 
-				if ( ShortCut.renderer.parent != null )
-				{
-					ShortCut.stage.removeChild( ShortCut.renderer );
-					
-					ShortCut.renderer.bitmapData.dispose();
-				}
-			
-			ShortCut.renderer = new Bitmap(new BitmapData(Lib.current.stage.stageWidth, Lib.current.stage.stageHeight, true,0xff0000));
-			ShortCut.stage.addChild( ShortCut.renderer );
-			ShortCut.renderer.x = ShortCut.stage.stageWidth / 2;
-			ShortCut.renderer.y = ShortCut.stage.stageHeight / 2;
-			
-			ShortCut.renderer.bitmapData.lock();*/
-			updateEnableMovies( times == c );
-			//ShortCut.renderer.bitmapData.unlock();
-			
 		}
+		var message = cpp.vm.Thread.readMessage (true);
+		_secondThread.sendMessage(cpp.vm.Thread.current());*/
+		//message = null;
+		doWork();
 		
-		
+	}
+	//---------------------------------------------------------------------
+	private function doWork() : Void
+	{
+		//while ( true )
+		{
+			//var main : Dynamic = cpp.vm.Thread.readMessage (true);
+			//trace("doWork: " + main);
+			_dt = updateDeltaTime();
+			this.dispatchEvent( new EngineEvent( ENTERFRAME_ENGINE, _dt ));
+			//trace("_gCForcingCounter==> " + _gCForcingCounter);
+			//if ( Std.random( 20 ) == 0 ) trace("##### engine => " + this.name);
+			var times: Int = Math.floor(_timerStocker / _fps);
+			var c: Int = 0;
+			while ( _timerStocker >= _fps )
+			{
+				
+				_timerStocker -= _fps; 
+				/*#if local
+					updateMemoryCleaner();
+				#end*/
+			
+				c++;
+				
+				updateTester2();
+				updateEnableMovies( times == c );
+				//ShortCut.renderer.bitmapData.unlock();
+				
+			}
+			
+			//main.sendMessage("ok");
+			
+		/*	_gCForcingCounter++;
+			if ( _gCForcingCounter >= 320 ) 
+			{
+				_gCForcingCounter = 0;
+				//trace("FORCING GC");
+				System.gc();
+			}*/
+		}
 	}
 	//---------------------------------------------------------------------
 	private function updateDeltaTime() : Float
@@ -358,12 +527,43 @@ class Engine extends Sprite
 		if ( force )
 		{
 			_fpsToUpdateCounter++;
-			if ( _fpsToUpdateCounter > _fpsToUpdate ) _fpsToUpdateCounter = 1;
+			if ( _fpsToUpdateCounter > fpsToUpdate ) _fpsToUpdateCounter = 1;
 		}
+	}
+	//--------------------------------------------------------------------------------
+	public function destroyMovieByGroup( group: String ) : Void
+	{
+		var i: Int = 0;
+		var n: Int = 0;
+		//trace("++++++++++++++++++++destroyMovieByGroup+++++++++++++++++++++", "warning");
+		while ( i < _enableMovies.length )
+		{
+			var movie: MovieClip = _enableMovies[i];
+			if (  movie.group == group ) 
+			{
+				var id: String = movie.id;
+				
+				unDisplayMovie( movie );
+				
+				movie.destroy( );
+			
+				
+				
+				n++;
+			}
+			else i++;
+		}
+		
+		_atlasStockage.destroyByGroup( group );
+		//trace("==> try rem id  " +id);
+				
+		//trace("############### destroyMovieByGroup => group: " + group + ", n: " + n,"error");
 	}
 	//--------------------------------------------------------------------------------
 	public function destroy(): Void
 	{
+		trace("DEstroy Engine => "+this.name );
+		
 		pauseEngine();
 		for ( movie in _enableMovies ) movie.destroy();
 		_atlasStockage.destroy();

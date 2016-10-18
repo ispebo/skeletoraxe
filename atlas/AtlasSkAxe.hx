@@ -106,7 +106,7 @@ class AtlasSkAxe
 	//---------------------------------------------------------------------------
 	private function cut( _x: Float, _y: Float, _w: Int, _h: Int ) : BitmapData
 	{
-		var color =  Math.random() * 0xFFFFFF;
+		var color =  Math.floor(Math.random() * 0xFFFFFF);
 		var bmpData: BitmapData = new BitmapData( _w, _h , true, cast( color));	
 		bmpData.copyPixels( _atlasBMP, new Rectangle( _x, _y, _w, _h), new Point(0, 0) );
 		

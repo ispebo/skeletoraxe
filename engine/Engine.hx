@@ -255,15 +255,15 @@ class Engine extends Sprite
 			{
 				try
 				{
-				
+					var xmlFile:String = m.xml;
 					var xmlStr: String = "";
-					if ( m.xml.indexOf(".ipb") != -1 )
+					if ( xmlFile.indexOf(".ipb") != -1 )
 					{
-						var byte: ByteArray = Assets.getBytes( m.xml );
+						var byte: ByteArray = Assets.getBytes( xmlFile );
 						byte.uncompress();
 						xmlStr = byte.readUTFBytes(byte.length);	
 					}
-					else xmlStr = Assets.getText( m.xml );
+					else xmlStr = Assets.getText( xmlFile );
 					
 					var bmpD: BitmapData = Assets.getBitmapData( m.bmp, false );
 					#if mobile
